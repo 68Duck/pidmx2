@@ -20,3 +20,12 @@ Allows the controlling of lights using DMX (digital multiplex) with a USB to DMX
 You can create your own lighting rig by moving around fixtures on the screen by patching them using the patch button. Then just click on the light to control the light.
 
 Different users can use the project with the included login system. Just create an account to start using the system.
+
+
+#Naming Conventions Used
+
+Variables using lowercase and using underscores to separate words (snakecase) e.g. my_variable
+
+Constants using all uppercase e.g. CONSTANT
+
+Classes using upper case camel case e.g. MyClass
