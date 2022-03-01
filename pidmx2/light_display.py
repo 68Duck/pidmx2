@@ -34,6 +34,7 @@ class Light_display(QWidget):
         self.fixtures = [None]*24
         self.occupied_channels = [None]*512
         self.preview_light = None
+        self.lights_to_place = []
         self.lights_info = [Generic_dimmer(None,None,None,None,None),RGBW_light(None,None,None,None,None),RGB_light(None,None,None,None,None),Miniscan(None,None,None,None,None),LED_bar_24_channel(None,None,None,None,None)]
 
     def add_fixture(self,x,y,light_type,fixture_number,channel_number,light_display_window):
@@ -81,12 +82,30 @@ class Light_display(QWidget):
     def place_fixture(self,light_type,fixture_number,channel_number):
         self.light_display_window.place_fixture(light_type,fixture_number,channel_number)
 
+    def setup_next_light_to_place(self):
+        valid = len(self.lights_to_place)>0
+        if valid:
+            next_light = self.lights_to_place.pop(0)
+            self.place_fixture(next_light["light_type"],next_light["fixture_number"],next_light["channel_number"])
+        return valid
+
+    def place_multiple_lights(self,lights_to_place_array):
+        for record in lights_to_place_array:
+            self.lights_to_place.append(record)
+        self.setup_next_light_to_place()
+
     def preview_fixture(self,x,y,light_type,light_display_window):
         if self.preview_light:
             self.preview_light.hide()
         for light in self.lights_info:
             if light.light_type == light_type:
                 self.preview_light = light.generate_new_light(x,y,None,None,light_display_window)
+
+    def get_no_channels(self,light_type):
+        for light in self.lights_info:
+            if light.light_type == light_type:
+                return len(light.channels)
+        return False
 
     def check_channels(self,start_channel,no_channels):
         if start_channel+no_channels-1>512: #-1 since the channel is valid if it is 512

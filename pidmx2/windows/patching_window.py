@@ -124,7 +124,19 @@ class Patching_window(QMainWindow,uic.loadUiType(os.path.join("windows/ui","patc
         elif self.patch_multiple_lights_radio.isChecked():
             number_of_lights = self.number_of_fixtures_input.value()
             channel_gap = self.channel_gap_input.value()
+            lights_to_place_array = []
             for i in range(number_of_lights):
                 result = self.light_display.check_new_fixture(light_type,fixture_number+i,channel_number+i*channel_gap)
+                if result is True:
+                    no_light_channels = self.light_display.get_no_channels(light_type)
+                    if no_light_channels is False:
+                        self.error_window = Error_window("That light has no channels?") #program should not reach here
+                        return
+                    lights_to_place_array.append({"light_type":light_type,"fixture_number":fixture_number+i,"channel_number":channel_number+i*(channel_gap+no_light_channels)})
+                else:
+                    self.error_window = Error_window(result)
+                    return
+            self.light_display.place_multiple_lights(lights_to_place_array)
+            self.close()
         else:
             raise Exception("No radio is pressed") #The program should never reach here

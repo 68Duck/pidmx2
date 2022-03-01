@@ -46,7 +46,7 @@ class Light_display_window(QMainWindow,uic.loadUiType(os.path.join("windows/ui",
                     x = event.x()
                     y = event.y()
                     self.add_fixture(x,y,self.new_light_type,self.new_fixture_number,self.new_channel_number)
-                    self.placing_light = False
+                    self.placing_light = self.light_display.setup_next_light_to_place()
                     return 1
 
         return super(Light_display_window, self).eventFilter(source, event)
