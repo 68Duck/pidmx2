@@ -1,0 +1,30 @@
+
+Don't allow for sequences to change position. Only allow them to be visible and hidden.
+
+Don't include create light types as probably not needed
+
+In coursework writeup, include blackout button, select all lights and select light types as added features.
+
+In write up mention error of 0 indexing since channels are from 1 to 512 but arrays are zero indexed
+
+Potentially mention robust design where values can only be changed through functions which have validation.
+
+For the open windows, create a template and change the names within the classes
+
+For colour mode in sequence window, have the colour chosen when colour mode is pressed?
+
+Add confirm window to close edit sequence window if unsaved changes made. Same for sequence window itself.
+
+Have effects as a property of the light. In send effects to lights (a function called in the main run loop), update the values of the channels depending on the current effect values.
+These effect values should be stored in a dictionary so other effects can be added later so the dictionary will contain an effect value and the name of the effect e.g. {"chaser":50,"rainbow":0}
+
+Have change colour and change intensity methods for all light classes so it can be generalised more easily
+
+Is the accounts table in 3NF if the username is unique?
+
+For creating error windows later use "ERROR" at the start of every error message.
+
+Check pressing enter for ok/submit if present for all windows
+
+Possibly put in stakeholder input that the logon/create account is not obvious what to input. Also make password input dots.
+Also for stakeholder input add extra faders since 24 is not that many

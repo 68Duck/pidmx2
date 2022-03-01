@@ -1,0 +1,386 @@
+procedure create_account(username,password) //creates an account by inserting a username and hashed password into a database
+    hash = hash_password(password) //hashes the password
+    usernames = SQL_execute("SELECT usernames FROM accounts WHERE username=?",(username)) //retrieves any saved usernames with the same name as the inputted username
+    Select all usernames from accounts where the useranme is the same
+    if usernames.length > 0  //checks if there are any usernames with the same name
+        display_error("There is a username which has the same name. Please try a different username")
+    else if username.length > 16 or username.length < 3  //checks the username length is between 3 and 16
+        display_error("The username must be between 3 and 16 characters. Please try a different username")
+    else if check_valid_characters(username) == False  //checks if the characters are valid so they can be stored using UTF-8 encoding
+        display_error("The username contains unauthorized characters. Please try a different username")
+    else if password.length == 0 //checks if there has been a password input
+        display_error("Please input a password.")
+    else
+        Insert the username and hash into the accounts tables.
+        SQL_execute("INSERT INTO logon(username,hash) Values(?,?)",(username,hash))  //inserts the new username and hashed password into the database if all the validation is passed
+    endif
+endprocedure
+
+
+function check_password(username,password) //checks if the login details are valid
+    hash = hash_password(password) //hashses the password
+    Select the hash from the accounts table where the username is equal to the input usernmae
+    correct_hash = SQL_execute("SELECT hash FROM accounts WHERE username=?",(username)) //checks if the hash of the password is the same as the one stored in the database
+    if correct_hash.length == 0 //checks there are any results otherwise there is no username with the same name
+        display_error("There is no username with that name. Please try again")
+        return False //returns False as the login details are invalid
+    else if correct_hash.length > 1
+        display_error("There is more than one of the same username") //The program should never reach this stage as there should only be one username with the same name
+        return False //returns False as the login details are invalid
+    else
+        if hash == correct_hash
+            return True //returns true as the login details are valid
+        else
+            return False //returns False as the login details are invalid
+    endif
+endfunction
+
+function check_patch(channel_number,fixture_number,light_type) //checks if the channels and fixture to be patched in are valid
+    light_channels = light_type.get_channels().length  //stores the number of channels
+    overlapping = False
+    for i = channel_number to channel_number + light_channels //iterates through all the channels that the light uses
+        if patched_channels[i] != None //checks if the current channel that is being iterated through is already patched in
+            overlapping = True //sets the overlpping flag to true
+    next i
+    if overlapping == True  //checks if any of the channels were overlapping
+        display_error("The light channels overlap with another fixture. Please try again")
+        return False //returns False as the channel number was invalid
+    else if channel_number.type != integer  //checks if the channel number is an integer
+        display_error("The channel number is not an integer. Please try again")
+        return False //returns False as the channel number was invalid
+    else if channel_number < 1  //checks if the channel number is in range
+        display_error("The channel number is too small. Please try again")
+        return False //returns False as the channel number was invalid
+    else if channel_number + light_channels > 512  //checks if the channel number is in range
+        display_error("The channel number is too large. Please try again")
+        return False //returns False as the channel number was invalid
+    else if fixture_number.type != integer //checks if the fixture number is an integer
+        display_error("The fixture number is not an integer. Please try again")
+        return False //returns False as the fixture number was invalid
+    else if fixture_number < 1 //checks if the fixture number is in range
+        display_error("The fixture number is below 1. Please try again")
+        return False //returns False as the fixture number was invalid
+    else if fixture_number > 48 //checks if the fixture number is in range
+        display_error("The fixture number is greater than 48. Please try again")
+        return False //returns False as the fixture number was invalid
+    else if patched_fixtures[fixture_number] != None //checks if there is already another fixture at that fixture number
+        display_error("That fixture is already patched in. Please try another fixture number")
+        return False //returns False as the fixture number was invalid
+    else
+        return True //returns true as all validation is passed
+    endif
+endfunction
+
+function check_channel_change(channel_number,channel_value) //validates if the channel being changed is valid
+    if channel_number.type != integer //checks if the channel number is an integer
+        display_error("The channel number is not an integer.")
+        return False //returns False as the channel number is invalid
+    else if channel_value.type != integer //checks if the channel value is an integer
+        display_error("The channel value is not an integer")
+        return False //returns False as the channel value is invalid
+    else if channel_number > 512 or channel_number < 1 // checks if the channel number is in range
+        display_error("The channel number is not in the range 1-512")
+        return False //returns False as the channel number is invalid
+    else if channel_value > 255 or channel_value < 0 //checks if the channel value is in range
+        display_error("The channel value is not in the range 0-255")
+        return False //returns False as the channel value is invalid
+    else
+        return True //returns True as all the validation is passed
+    end if
+endprocedure
+
+procedure select_all_lights(light_list) //selects every light in the light list used if the select all button is pressed
+    for i = 0 to light_list.length - 1 //iterates through every light in the light list
+        light = light_list[i]
+        if light.selected == False //checks if the light is selected
+            light.toggle_selected() //only if the light is not selected, then it toggles it from off to on
+        end if
+    next i
+endprocedure
+
+procedure select_lights_by_type(light_list,light_type) //selects all lights of a specific type
+    for i = 0 to light_list.length - 1 //iterates through every light in the light list
+        light = light_list[i]
+        if light.selected == False and light.type == light_type //checks if the light is selected and is of the correct light type.
+            light.toggle_selected() //toggles the light only if the light is off and is of the correct type.
+        end if
+    next i
+endprocedure
+
+
+function get_next_rainbow() //finds the next colour in the rainbow in rgb format
+    if red_increasing
+        if red_rainbow + 1 > 255
+            red_increasing = False
+            blue_decreasing = True
+        else
+            red_rainbow = red_rainbow + 1
+        end if
+    else if red_decreasing
+        if red_rainbow - 1 < 0
+            red_decreasing = False
+            blue_increasing = True
+        else
+            red_rainbow = red_rainbow + 1
+        end if
+    else if green_increasing
+        if green_rainbow + 1 > 255
+            green_increasing = False
+            red_decreasing = True
+        else
+            green_rainbow = green_rainbow + 1
+        end if
+    else if green_decreasing
+        if green_rainbow - 1 <= 0
+            green_decreasing = False
+            red_increasing = True
+        else
+            green_rainbow = green_rainbow + 1
+        end if
+    else if blue_increasing
+        if blue_rainbow + 1 >= 255
+            blue_increasing = False
+            green_decreasing = True
+        else
+            blue_rainbow = blue_rainbow + 1
+        end if
+    else if blue_decreasing
+        if blue_rainbow - 1 <= 0
+            blue_decreasing = False
+            green_increasing = True
+        else
+            blue_rainbow = blue_rainbow - 1
+        end if
+    endif
+    return [red_rainbow,green_rainbow,blue_rainbow]
+endfunction
+
+procedure next_chase(selected_lights)
+    current_light.toggle_intensity()  // sets the current-light that is on in the chase to off.
+    current_light = selected_lights[(1+current_light_number)%(selected_light.length)] // moves current light to the next light in the list. If the end of the list is reached it wraps around.
+    current_light.toggle_intensity()  // then sets the next current_light to on
+endprocedure
+
+function check_if_selected(light_list) //checks if any lights are selected
+    for i = 0 to light_list.length - 1 //iterates through each light in the light list
+        light = light_list[i]
+        if light.selected == True //checks if this light is selected
+            return True  //returns true as at least one light is selected
+        end if
+    next i
+    return False  //Only if none of the lights are selected it will reach here meaning that it should return False
+endfunction
+
+
+procedure remove_light(light) //removes a light
+    for i = light.start_channel to light.start_channel + light.channels.length: //iterates through the channels of the lights
+        set_channel(i,0)  //set the channel i to 0 meaning that all channels that were used by the light being removed are set to zero
+        patched_channels[0] = None //removes the channels from patched channels so they can be patched into again
+    next i
+    patched_fixtures[light.fixture_number] = None //removed the light from patched_fixtures so that it can be patched into again
+    light_list.remove(light) //remvoes the light once the channels have been turned off
+endprocedure
+
+procedure save_rig(light_list,rig_table_name) //saves the rig so saves all lights in a new table called rig_table_name
+    for i = 0 to light_list.length-1 //iterates through each light in the light_list
+        light = light_list[i]
+        Insert the relevent information into the rigs table.
+        SQL_execute("INSERT INTO (?)(light_type,position,channel_number) VALUES(?,?,?)",(rig_table_name,light.light_type,light.position,light.channel_number)) // inserts the light information into the new_rig table
+    next i
+endprocedure
+
+procedure open_rig(rig_table_name) //opens the rig from the information in the rig table
+    database_information = SQL_execute("SELECT (light_type,position,channel_number) FROM (rig_table_name)") //retrieves all relevent information from the table
+    light_list = []
+    for i = 0 to database_information.length-1 //iterates through all the infromation retrived through the table
+        type = database_information[i]["light_type"]
+        position = database_information[i]["position"]
+        channel_number = database_information[i]["channel_number"]
+        light = new Light(type,position,channel_number) //creates a new light with the new light information
+        no_channels = light.get_channels().length
+        for j = channel_number to channel_number + no_channels //iterates through all channels of the light
+            patched_channels[j] = type+channel_number //patched_channels stores the channels currently in use so they can't overlap
+        next j
+        light_list.append(light) //adds the new light to the light_list
+    next i
+endprocedure
+
+procedure delete_rig(rig_name) //deletes the rig table
+    SQL_execute("DELETE FROM rigs WHERE rig_name = (?)",rig_name)
+endprocedure
+
+procedure save_playback(light_list,playback_table_name) // saves the playback into the database
+    for i = 0 to light_list.length-1 //iterates through all the lights in the light_list
+        light = light_list[i]
+        no_channels = light.get_channels().length()
+        for j = light.channel_number to light.channel_number + no_channels // iterates through the channels of the lights
+            SQL_execute("INSERT INTO (?)(channel_number,channel_value) VALUES(?,?)",(light.channel_number+j,channel_value)) //inserts the channel values into the database
+        next j
+    next i
+endprocedure
+
+procedure open_playback(light_list,playback_table_name) //opens the playback from the database
+    database_information = SQL_execute("SELECT (channel_number,channel_value) FROM (playback_table_name)") //retrives all relevent information from the database
+    for i = 0 to database_information.length-1 //iterates through all the relevent infromation
+        channel_number = database_information[i]["channel_number"]
+        channel_value = database_information[i]["channel_value"]
+        set_channel(channel_number,channel_value) //sets the channel to the saved value
+    next i
+    for j = 0 to light_list.length-1 //iterates through each light in the light_list
+        light = light_list[i]
+        start_channel = light.start_channel
+        no_channels = light.get_channels().length  //get_channels returns the channels of the light as an array so .length finds the amount of channels
+        for k = start_channel to start_channel + no_channels //itertates through each channel in the light
+            channel_value = get_channel_value(k)
+            light.set_channel_value(k,channel_value) //sets the channel at address k to the new channel_value so the light can be changed on the screen
+        next k
+    next j
+endprocedure
+
+procedure add_all_lights(light_list) //adds all lights into the sequence window in their previous position
+    sequence_lights = []
+    for i = 0 to light_list.length-1 //iterates through each light in the light_list
+        light = light_list[i]
+        type = light.light_type
+        position = light.light_position
+        start_channel = light.start_channel
+        sequence_light = new Sequence_light(type,position,start_channel) // creates the new sequence light with the information from the light_list
+        sequence_lights.append(sequence_light)
+    next i
+endprocedure
+
+procedure set_colour(light,colour) //sets the colour of the light
+    red = colour["red"]
+    green = colour["green"]
+    blue = colour["blue"]
+    channels = light.get_channels()
+    for i = 0 to channels.length-1 //iterates through each channel in the light
+        if channels[i] == "red" //finds the channel which is red
+            light.set_channel(i,red) //sets the red channel to the red value of the colour
+        else if channels[i] == "green"//finds the channel which is green
+            light.set_channel(i,green) //sets the green channel to the green value of the colour
+        else if channels[i] == "blue"//finds the channel which is blue
+            light.set_channel(i,blue) //sets the blue channel to the blue value of the colour
+        end if
+    next i
+endprocedure
+
+procedure save_sequence(sequence_id,sequence_name,sequence_lights,playbacks_id) //saves the sequence to the database
+    SQL_execute("INSERT INTO sequences(name,sequence_id,playbacks_id) VALUES(?,?)",(sequence_name,sequence_id,playbacks_id))  //playbacks_id is the id of the table where the playbacks are stored for this sequnece
+    SQL_execute("CREATE TABLE (sequence_table_name) (
+      sequence_table_name = "sequence" + sequence_id
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    light_type TEXT NOT NULL,
+    position TEXT NOT NULL,
+    channel_number INT NOT NULL
+    ))") //creates the new table for the sequence playback
+    for i = 0 to sequence_lights.length-1 //iterates through all the sequence lights
+        light = sequence_lights[i]
+        type = light.light_type
+        position = light.position
+        channel_number = light.channel_number
+        SQL_execute("INSERT INTO (sequence_table_name)(type,position,channel_number) VALUES(?,?,?)",(type,position,start_channel)) //inserts the infromation into the sequence playback table
+    next i
+endprocedure
+
+procedure open_sequence(sequence_name) //opens a saved sequence
+    id = SQL_execute("SELECT sequene_id FROM sequences WHERE name=(sequence_name)") //finds the id of the sequence
+    if id == None
+        ERROR
+    else
+        sequence_lights = []
+        sequence_table_name = "sequence" + id  //finds the table name by concatinating "sequence" with id
+        database_information = SQL_execute("SELECT (light_type,position,start_channel) FROM (sequence_table_name)") //retrives all relevent information from the database
+        for i = 0 to database_information.length-1 //iterates therough the information from the database
+          type = database_information[i]["light_type"]
+          position = database_information[i]["position"]
+          channel_number = database_information[i]["channel_number"]
+          light = new Sequence_light(type,position,channel_number) //creates the new sequence lights from the database information
+          sequence_lights.appened(light)
+        next i
+    endif
+endprocedure
+
+procedure open_next_playback(sequence_name,light_list) //opens the next playback in the sequence
+    playbacks_id = SQL_execute("SELECT playback_id FROM sequencs WHERE sequence_name = (sequence_name)") //reteives the next playback id
+    if playbacks_id == None
+        ERROR
+    else
+        playbacks_table_name = "sequence_playbacks" + playbacks_id //gets the playback table name
+        next_id = get_next_playback_id()
+        playback_table_name = SQL_execute("SELECT (playback_table_name) FROM (playbacks_table_name) WHERE playback_id = (next_id)") //finds the playback table name
+        if playback_table_name == None
+            ERROR
+        else
+            open_playback(light_list,playback_table_name) //opends the relevent playback with the found playback table name
+        endif
+    endif
+endprocedure
+
+procedure run_sequence(sequence_name) //runs the named sequence
+    playbacks_id = SQL_execute("SELECT playback_id FROM sequencs WHERE sequence_name = (sequence_name)") //finds the playback name
+    if playbacks_id == None
+        ERROR
+    else
+        playbacks_table_name = "sequence_playbacks" + playbacks_id //finds the playback table name
+        time_delays = SQL_execute("SELECT (time_delay) FROM (playbacks_table_name)") //finds the time delays
+        for i = 0 to time_delays.length-1 //iterates through each fo the time delays
+            open_next_playback(sequence_name,light_list) //opens the playback
+            wait(time_delay) //waits for the time delay before playing the next playback
+        next i
+    endif
+endprocedure
+/*
+procedure save_new_light_type(light_name,image_name,channels,indicators,is_RGB,has_pantilt) //saves a new light type
+    if light_name == None //checks that there is a light name
+        display_error("There is no light name. Please try again")
+    else if has_duplicates(channels) //checks if there are any duplicates
+        display_error("There are channels with the same name. Please try again")
+    else
+        names = SQL_execute("SELECT (light_name) FROM light_types WHERE light_name = (?)",light_name) //finds if there are any light names with the same name
+        if names.length > 0
+            display_error("There is already a light with that name. Please try again")
+        else if image_name == None //checks if there are any image names
+            display_error("There is no image saved for the light. Please try again.")
+        else
+            channels_id = get_next_channels_id() //gets the next channel id
+            channels_table_name = "channels" + channels_id //finds the channels tables name
+            SQL_execute("CREATE TABLE (channels_table_name) (
+            id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            channel_name, TEXT NOT NULL
+            channel_start_value, INT NOT NULL,
+            channel_information, TEXT
+            )") //Creates the channels table
+            for i = 0 to channels.length-1 //iterates through all the channels
+                channel = channels[i]
+                channel_name = channel[channel_name]
+                channel_start_value = channel[channel_start_value]
+                channel_information = channel[channel_information]
+                SQL_execute("INSERT INTO (channels_table_name)(channel_name,channel_start_value,channel_information) VALUES (?,?,?)",(channel_name,channel_start_value,channel_information)) //saves the channels information into the database
+            next i
+
+            indicators_id = get_next_indicators_id()
+            indicators_table_name = "indicators" + indicators_id
+            SQL_execute("CREATE TABLE (indicators_channel_name) (
+            id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            x, INT NOT NULL,
+            y, INT NOT NULL,
+            width, INT NOT NULL,
+            height, INT NOT NULL,
+            type, TEXT NOT NULL
+            )")//Creates the indicators table
+
+            for i = 0 to indicators.length-1 //iterates through all the indicators
+                indicator = indicator[i]
+                x = indicator[x]
+                y = indicator[y]
+                width = indicator[width]
+                height = indicator[height]
+                type = indicator[type]
+                SQL_execute("INSERT INTO (indicators_table_name)(x,y,width,height,type) VALUES(?,?,?,?,?)"(x,y,width,height,type))//saves the indicators information into the indicators table
+            next i
+            SQL_execute("INSERT INTO light_types(light_name,image_name,is_RGB,has_pantilt,indicators_id,channels_id) VALUES (?,?,?,?,?,?)",(light_name,image_name,is_RGB,has_pantilt,indicators_id,channels_id)) //inserts the new light into the light_types table
+
+        endif
+    endif
+endprocedure */

@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1900</width>
+    <height>1080</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QAction{color:white;}
+QMainWindow{color:white;background-color:black;}
+</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QPushButton" name="blackout_button">
+    <property name="geometry">
+     <rect>
+      <x>1770</x>
+      <y>10</y>
+      <width>101</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton::checked{background-color:yellow;border-radius:5px;}
+QPushButton{background-color:white;border-radius:5px;}</string>
+    </property>
+    <property name="text">
+     <string>Blackout</string>
+    </property>
+    <property name="checkable">
+     <bool>true</bool>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1900</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuPatch">
+    <property name="title">
+     <string>Patch</string>
+    </property>
+    <addaction name="patch_action"/>
+   </widget>
+   <widget class="QMenu" name="menuEffects">
+    <property name="title">
+     <string>Effects</string>
+    </property>
+    <addaction name="effects_action"/>
+    <addaction name="select_lights_action"/>
+    <addaction name="select_all_lights_action"/>
+    <addaction name="select_light_type_action"/>
+    <addaction name="choose_colour_action"/>
+   </widget>
+   <widget class="QMenu" name="menuRig">
+    <property name="title">
+     <string>Rig</string>
+    </property>
+    <addaction name="open_rig_action"/>
+    <addaction name="save_rig_action"/>
+   </widget>
+   <widget class="QMenu" name="menuPlayback">
+    <property name="title">
+     <string>Playback</string>
+    </property>
+    <addaction name="record_playback_action"/>
+    <addaction name="save_playback_action"/>
+   </widget>
+   <widget class="QMenu" name="menuSequence">
+    <property name="title">
+     <string>Sequence</string>
+    </property>
+    <addaction name="sequence_action"/>
+    <addaction name="open_sequence_action"/>
+    <addaction name="stop_sequence_action"/>
+   </widget>
+   <widget class="QMenu" name="menuCreate_Light_Type">
+    <property name="title">
+     <string>Stage</string>
+    </property>
+    <addaction name="stage_creator_action"/>
+    <addaction name="open_stage_action"/>
+   </widget>
+   <widget class="QMenu" name="menuFixture_Sliders">
+    <property name="title">
+     <string>Fixture Faders</string>
+    </property>
+    <addaction name="fixture_faders_action"/>
+   </widget>
+   <widget class="QMenu" name="menuMode_selection">
+    <property name="title">
+     <string>Mode selection</string>
+    </property>
+    <addaction name="mode_selection_action"/>
+   </widget>
+   <addaction name="menuPatch"/>
+   <addaction name="menuEffects"/>
+   <addaction name="menuRig"/>
+   <addaction name="menuPlayback"/>
+   <addaction name="menuSequence"/>
+   <addaction name="menuCreate_Light_Type"/>
+   <addaction name="menuFixture_Sliders"/>
+   <addaction name="menuMode_selection"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="patch_action">
+   <property name="text">
+    <string>Patch New Light</string>
+   </property>
+  </action>
+  <action name="effects_action">
+   <property name="text">
+    <string>Effects Window</string>
+   </property>
+  </action>
+  <action name="select_lights_action">
+   <property name="text">
+    <string>Select Lights</string>
+   </property>
+  </action>
+  <action name="select_all_lights_action">
+   <property name="text">
+    <string>Select All Lights</string>
+   </property>
+  </action>
+  <action name="select_light_type_action">
+   <property name="text">
+    <string>Select Light Type</string>
+   </property>
+  </action>
+  <action name="choose_colour_action">
+   <property name="text">
+    <string>Choose Colour</string>
+   </property>
+  </action>
+  <action name="mode_selection_action">
+   <property name="text">
+    <string>Mode selection</string>
+   </property>
+  </action>
+  <action name="open_rig_action">
+   <property name="text">
+    <string>Open Rig</string>
+   </property>
+  </action>
+  <action name="save_rig_action">
+   <property name="text">
+    <string>Save Rig</string>
+   </property>
+  </action>
+  <action name="record_playback_action">
+   <property name="text">
+    <string>Record Playback</string>
+   </property>
+  </action>
+  <action name="save_playback_action">
+   <property name="text">
+    <string>Save Playback</string>
+   </property>
+  </action>
+  <action name="sequence_action">
+   <property name="text">
+    <string>Sequence Window</string>
+   </property>
+  </action>
+  <action name="open_sequence_action">
+   <property name="text">
+    <string>Open Sequence</string>
+   </property>
+  </action>
+  <action name="stop_sequence_action">
+   <property name="text">
+    <string>Stop Sequence</string>
+   </property>
+  </action>
+  <action name="stage_creator_action">
+   <property name="text">
+    <string>Stage Creator Window</string>
+   </property>
+  </action>
+  <action name="open_stage_action">
+   <property name="text">
+    <string>Open Stage</string>
+   </property>
+  </action>
+  <action name="fixture_faders_action">
+   <property name="text">
+    <string>Fixture Faders</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
