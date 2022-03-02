@@ -71,7 +71,7 @@ color: white;
     <string>Move Fixture</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="duplicate_fixture">
+  <widget class="QPushButton" name="duplicate_fixture_button">
    <property name="geometry">
     <rect>
      <x>320</x>

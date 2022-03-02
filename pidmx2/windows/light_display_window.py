@@ -48,6 +48,13 @@ class Light_display_window(QMainWindow,uic.loadUiType(os.path.join("windows/ui",
                     self.add_fixture(x,y,self.new_light_type,self.new_fixture_number,self.new_channel_number)
                     self.placing_light = self.light_display.setup_next_light_to_place()
                     return 1
+        else: #so checking if a light was cliked
+            if source == self: #only want to detect mouse clicks on the light display window
+                if event.type() == QEvent.MouseButtonPress:
+                    if event.buttons() == Qt.LeftButton:
+                        x = event.x()
+                        y = event.y()
+                        self.light_display.check_for_light_click(x,y)
 
         return super(Light_display_window, self).eventFilter(source, event)
 

@@ -18,6 +18,7 @@ from windows.ip_address_selection_window import Ip_address_selection_window
 from windows.raspberry_pi_password_input_window import Raspberry_pi_password_input_window
 from windows.error_window import Error_window
 from windows.patching_window import Patching_window
+from windows.slider_pannel_window import Slider_pannel_window
 
 
 class Light_display(QWidget):
@@ -27,6 +28,7 @@ class Light_display(QWidget):
         self.database_manager = Database_manager()
         self.username = "test"  #CHANGE ME TO NONE
         self.sending_dmx = False
+        self.running_raspberry_pi_dmx = False
         self.timer = QTimer()
         self.timer.timeout.connect(self.send_dmx)
         self.raspberry_test_timer = QTimer()
@@ -37,14 +39,21 @@ class Light_display(QWidget):
         self.lights_to_place = []
         self.lights_info = [Generic_dimmer(None,None,None,None,None),RGBW_light(None,None,None,None,None),RGB_light(None,None,None,None,None),Miniscan(None,None,None,None,None),LED_bar_24_channel(None,None,None,None,None)]
 
+    def update_universe_from_fixtures(self):
+        for fixture in self.fixtures:
+            if fixture is not None:
+                channel_number = fixture.get_channel_number()
+                for i,channel in enumerate(fixture.get_channels()):
+                    self.set_dmx(channel_number+i,channel[1])
+
     def add_fixture(self,x,y,light_type,fixture_number,channel_number,light_display_window):
         if self.fixtures[fixture_number] is not None:
             return "Fixture is already taken"
         else:
             self.new_light = None
             for light in self.lights_info:
-                if light.light_type == light_type:
-                    channels_valid = self.check_channels(start_channel = channel_number,no_channels=len(light.channels))
+                if light.get_light_type() == light_type:
+                    channels_valid = self.check_channels(start_channel = channel_number,no_channels=len(light.get_channels()))
                     if channels_valid:
                         self.new_light = light.generate_new_light(x,y,channel_number,fixture_number,light_display_window)
                         self.fixtures[fixture_number-1] = self.new_light #-1 since fixture number is 1 indexed not 0
@@ -61,8 +70,8 @@ class Light_display(QWidget):
         else:
             self.new_light = None
             for light in self.lights_info:
-                if light.light_type == light_type:
-                    channels_valid = self.check_channels(start_channel = channel_number,no_channels=len(light.channels))
+                if light.get_light_type() == light_type:
+                    channels_valid = self.check_channels(start_channel = channel_number,no_channels=len(light.get_channels()))
                     if channels_valid:
                         return True
                     else:
@@ -76,7 +85,7 @@ class Light_display(QWidget):
         return self.fixtures[fixture_number-1] is None #-1 since occupied_channels is 0 indexed
 
     def get_light_types(self):
-        return [light.light_type for light in self.lights_info]
+        return [light.get_light_type() for light in self.lights_info]
 
 
     def place_fixture(self,light_type,fixture_number,channel_number):
@@ -94,17 +103,25 @@ class Light_display(QWidget):
             self.lights_to_place.append(record)
         self.setup_next_light_to_place()
 
+    def check_for_light_click(self,x,y):
+        for light in self.fixtures:
+            if light is not None:
+                if light.check_for_click(x,y):
+                    self.run_slider_pannel_window(light)
+                # if x>light.x-light.clickable_region[0] and x < light.x+light.clickable_region[1]:
+                #     if y>light.y-light.clickable_region[2] and y<light.y+light.clickable_region[3]:
+
     def preview_fixture(self,x,y,light_type,light_display_window):
         if self.preview_light:
             self.preview_light.hide()
         for light in self.lights_info:
-            if light.light_type == light_type:
+            if light.get_light_type() == light_type:
                 self.preview_light = light.generate_new_light(x,y,None,None,light_display_window)
 
     def get_no_channels(self,light_type):
         for light in self.lights_info:
-            if light.light_type == light_type:
-                return len(light.channels)
+            if light.get_light_type() == light_type:
+                return len(light.get_channels())
         return False
 
     def check_channels(self,start_channel,no_channels):
@@ -148,6 +165,10 @@ class Light_display(QWidget):
         else:
             raise Exception("Username is not defined")
 
+    def run_slider_pannel_window(self,light):
+        self.slider_pannel_window = Slider_pannel_window(light,self)
+        self.slider_pannel_window.show()
+
     def wired_DMX(self,port):
         self.dmx_controller = DMX_controller(port)
         self.sending_dmx = True
@@ -157,6 +178,12 @@ class Light_display(QWidget):
     def send_dmx(self):
         if self.sending_dmx:
             self.dmx_controller.send()
+        if self.running_raspberry_pi_dmx:
+            pass  #finish me
+
+    def set_dmx(self,channel_number,channel_value):
+        if self.sending_dmx:
+            self.dmx_controller.set_data(channel_number,channel_value)
 
     def raspberry_test(self):
         result = self.raspberry_pi_manager.send_command("test")
@@ -192,6 +219,7 @@ class Light_display(QWidget):
 
     def raspberry_pi_login(self,password):
         self.raspberry_pi_password = password
+        self.running_raspberry_pi_dmx = True
         self.raspberry_pi_manager = Raspberry_pi_manager(self.ipv4,self.raspberry_pi_password)
         try:
             self.raspberry_pi_manager.run_file()
