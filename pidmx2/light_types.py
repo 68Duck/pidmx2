@@ -4,13 +4,14 @@ from PyQt5.QtGui import*
 from PyQt5.QtCore import*
 
 class Light_type(object):
-    def __init__(self,x,y,channel_number,fixture_number,light_display_window):
+    def __init__(self,x,y,channel_number,fixture_number,light_display_window,copy):
         self.light_display_window = light_display_window
         self.channel_number = channel_number
         self.fixture_number = fixture_number
-        self.channels = [["channel_name","channel_value"]]
+        # self.channels = [["channel_name","channel_value"]]
         self.x = x
         self.y = y
+        self.copy = copy
 
     def create_shapes(self): #creates the shapes for each part of the abstraction of the light
         pass
@@ -38,11 +39,17 @@ class Light_type(object):
     def get_channels(self):
         return self.channels
 
+    def is_copy():
+        return self.copy is True
+
     def get_light_type(self):
         return self.light_type
 
     def get_channel_number(self):
         return self.channel_number
+
+    def get_fixture_number(self):
+        return self.fixture_number
 
     def check_for_click(self,x,y):
         if x>self.x-self.clickable_region[0] and x < self.x+self.clickable_region[1]:
@@ -52,8 +59,8 @@ class Light_type(object):
 
 
 class Generic_dimmer(Light_type):
-    def __init__(self,x,y,channel_number,fixture_number,light_display_window):
-        super().__init__(x,y,channel_number,fixture_number,light_display_window)
+    def __init__(self,x,y,channel_number,fixture_number,light_display_window,copy):
+        super().__init__(x,y,channel_number,fixture_number,light_display_window,copy)
         self.channels = [["Intensity",0]]
         self.light_type = "Generic_dimmer"
         self.clickable_region = [0,35,0,75] #in the order left right top bottom from x,y
@@ -83,16 +90,16 @@ class Generic_dimmer(Light_type):
         self.shape.show()
         return self.shape
 
-    def generate_new_light(self,x,y,channel_number,fixture_number,light_display_window):
-        return Generic_dimmer(x,y,channel_number,fixture_number,light_display_window)
+    def generate_new_light(self,x,y,channel_number,fixture_number,light_display_window,copy):
+        return Generic_dimmer(x,y,channel_number,fixture_number,light_display_window,copy)
 
     def update_display(self):
         intensity = self.channels[0][1]
         self.indicator.setStyleSheet(f'background-color: rgba(255,255,0,{intensity/255});')
 
 class RGBW_light(Light_type):
-    def __init__(self,x,y,channel_number,fixture_number,light_display_window):
-        super().__init__(x,y,channel_number,fixture_number,light_display_window)
+    def __init__(self,x,y,channel_number,fixture_number,light_display_window,copy):
+        super().__init__(x,y,channel_number,fixture_number,light_display_window,copy)
         self.channels = [["Red",0],["Green",0],["Blue",0],["White",0]]
         self.light_type = "RGBW_light"
         self.clickable_region = [40,40,40,40] #in the order left right top bottom from x,y
@@ -127,8 +134,8 @@ class RGBW_light(Light_type):
         self.shape.show()
         return self.shape
 
-    def generate_new_light(self,x,y,channel_number,fixture_number,light_display_window):
-        return RGBW_light(x,y,channel_number,fixture_number,light_display_window)
+    def generate_new_light(self,x,y,channel_number,fixture_number,light_display_window,copy):
+        return RGBW_light(x,y,channel_number,fixture_number,light_display_window,copy)
 
     def update_display(self):
         red = self.channels[0][1]
@@ -143,8 +150,8 @@ class RGBW_light(Light_type):
 
 
 class RGB_light(Light_type):
-    def __init__(self,x,y,channel_number,fixture_number,light_display_window):
-        super().__init__(x,y,channel_number,fixture_number,light_display_window)
+    def __init__(self,x,y,channel_number,fixture_number,light_display_window,copy):
+        super().__init__(x,y,channel_number,fixture_number,light_display_window,copy)
         self.channels = [["Intensity",0],["Red",0],["Green",0],["Blue",0]]
         self.light_type = "RGB_light"
         self.clickable_region = [40,40,40,40] #in the order left right top bottom from x,y
@@ -179,8 +186,8 @@ class RGB_light(Light_type):
         self.shape.show()
         return self.shape
 
-    def generate_new_light(self,x,y,channel_number,fixture_number,light_display_window):
-        return RGB_light(x,y,channel_number,fixture_number,light_display_window)
+    def generate_new_light(self,x,y,channel_number,fixture_number,light_display_window,copy):
+        return RGB_light(x,y,channel_number,fixture_number,light_display_window,copy)
 
     def update_display(self):
         intensity = self.channels[0][1]
@@ -193,8 +200,8 @@ class RGB_light(Light_type):
 
 
 class Miniscan(Light_type):
-    def __init__(self,x,y,channel_number,fixture_number,light_display_window):
-        super().__init__(x,y,channel_number,fixture_number,light_display_window)
+    def __init__(self,x,y,channel_number,fixture_number,light_display_window,copy):
+        super().__init__(x,y,channel_number,fixture_number,light_display_window,copy)
         self.channels = [["Colour",0],["Gobo_roatation",0],["Gobo",0],["Intensity",0],["Pan",0],["Tilt",0],["Effects",0]]
         self.light_type = "Miniscan"
         self.clickable_region = [0,70,0,30] #in the order left right top bottom from x,y
@@ -227,8 +234,8 @@ class Miniscan(Light_type):
         self.shape.show()
         return self.shape
 
-    def generate_new_light(self,x,y,channel_number,fixture_number,light_display_window):
-        return Miniscan(x,y,channel_number,fixture_number,light_display_window)
+    def generate_new_light(self,x,y,channel_number,fixture_number,light_display_window,copy):
+        return Miniscan(x,y,channel_number,fixture_number,light_display_window,copy)
 
     def update_display(self):
         intensity = self.channels[3][1]
@@ -236,8 +243,8 @@ class Miniscan(Light_type):
 
 
 class LED_bar_24_channel(Light_type):
-    def __init__(self,x,y,channel_number,fixture_number,light_display_window):
-        super().__init__(x,y,channel_number,fixture_number,light_display_window)
+    def __init__(self,x,y,channel_number,fixture_number,light_display_window,copy):
+        super().__init__(x,y,channel_number,fixture_number,light_display_window,copy)
         self.channels = self.setup_channels()
         self.light_type = "LED_bar_24_channel"
         self.clickable_region = [0,20,0,175] #in the order left right top bottom from x,y
@@ -273,8 +280,8 @@ class LED_bar_24_channel(Light_type):
         self.shape.show()
         return self.shape
 
-    def generate_new_light(self,x,y,channel_number,fixture_number,light_display_window):
-        return LED_bar_24_channel(x,y,channel_number,fixture_number,light_display_window)
+    def generate_new_light(self,x,y,channel_number,fixture_number,light_display_window,copy):
+        return LED_bar_24_channel(x,y,channel_number,fixture_number,light_display_window,copy)
 
     def update_display(self):
         for i in range(1,9,1):

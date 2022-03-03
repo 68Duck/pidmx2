@@ -28,3 +28,5 @@ Check pressing enter for ok/submit if present for all windows
 
 Possibly put in stakeholder input that the logon/create account is not obvious what to input. Also make password input dots.
 Also for stakeholder input add extra faders since 24 is not that many
+
+Add confirm window to slider panel window removign light

@@ -26,8 +26,8 @@ class Light_display_window(QMainWindow,uic.loadUiType(os.path.join("windows/ui",
     def patch_pressed(self):
         self.light_display.run_patching_window()
 
-    def add_fixture(self,x,y,light_type,fixture_number,channel_number):
-        result = self.light_display.add_fixture(x,y,light_type,fixture_number,channel_number,self)
+    def add_fixture(self,x,y,light_type,fixture_number,channel_number,copy=False):
+        result = self.light_display.add_fixture(x,y,light_type,fixture_number,channel_number,self,copy)
         if result is True:
             pass
         else:
@@ -45,7 +45,7 @@ class Light_display_window(QMainWindow,uic.loadUiType(os.path.join("windows/ui",
                 if event.buttons() == Qt.LeftButton:
                     x = event.x()
                     y = event.y()
-                    self.add_fixture(x,y,self.new_light_type,self.new_fixture_number,self.new_channel_number)
+                    self.add_fixture(x,y,self.new_light_type,self.new_fixture_number,self.new_channel_number,self.placing_copy_light)
                     self.placing_light = self.light_display.setup_next_light_to_place()
                     return 1
         else: #so checking if a light was cliked
@@ -59,11 +59,12 @@ class Light_display_window(QMainWindow,uic.loadUiType(os.path.join("windows/ui",
         return super(Light_display_window, self).eventFilter(source, event)
 
 
-    def place_fixture(self,light_type,fixture_number,channel_number):
+    def place_fixture(self,light_type,fixture_number,channel_number,copy=False):
         self.new_light_type = light_type
         self.new_fixture_number = fixture_number
         self.new_channel_number = channel_number
         self.placing_light = True
+        self.placing_copy_light = copy
 
 
     def mode_selection_pressed(self):

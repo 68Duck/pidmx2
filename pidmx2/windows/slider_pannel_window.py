@@ -30,13 +30,23 @@ class Slider_pannel_window(QWidget,uic.loadUiType(os.path.join("windows/ui","sli
 
 
     def duplicate_fixture_button_pressed(self):
-        pass
+        self.light_display.place_fixture(self.light.get_light_type(),self.light.get_fixture_number(),self.light.get_channel_number(),copy=True)
+        self.close()
 
     def move_fixture_button_pressed(self):
-        pass
+        self.light.hide()
+        self.delete_fixture()
+        self.light_display.place_fixture(self.light.get_light_type(),self.light.get_fixture_number(),self.light.get_channel_number())
+        self.close()
 
     def remove_fixture_button_pressed(self):
-        pass
+        #ADD CONFIRM WINDOW HERE
+        self.light.hide()
+        self.delete_fixture()
+        self.close()
+
+    def delete_fixture(self):
+        self.light_display.delete_fixture(self.light)
 
 
     def create_fader(self,x,y,start_value,channel_name):

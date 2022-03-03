@@ -37,7 +37,8 @@ class Light_display(QWidget):
         self.occupied_channels = [None]*512
         self.preview_light = None
         self.lights_to_place = []
-        self.lights_info = [Generic_dimmer(None,None,None,None,None),RGBW_light(None,None,None,None,None),RGB_light(None,None,None,None,None),Miniscan(None,None,None,None,None),LED_bar_24_channel(None,None,None,None,None)]
+        self.lights_info = [Generic_dimmer(None,None,None,None,None,None),RGBW_light(None,None,None,None,None,None),RGB_light(None,None,None,None,None,None),Miniscan(None,None,None,None,None,None),LED_bar_24_channel(None,None,None,None,None,None)]
+        self.copy_lights = []
 
     def update_universe_from_fixtures(self):
         for fixture in self.fixtures:
@@ -46,7 +47,7 @@ class Light_display(QWidget):
                 for i,channel in enumerate(fixture.get_channels()):
                     self.set_dmx(channel_number+i,channel[1])
 
-    def add_fixture(self,x,y,light_type,fixture_number,channel_number,light_display_window):
+    def add_fixture(self,x,y,light_type,fixture_number,channel_number,light_display_window,copy=False):
         if self.fixtures[fixture_number] is not None:
             return "Fixture is already taken"
         else:
@@ -59,6 +60,10 @@ class Light_display(QWidget):
                         self.fixtures[fixture_number-1] = self.new_light #-1 since fixture number is 1 indexed not 0
                         for i in range(len(light.channels)):
                             self.occupied_channels[channel_number+i-1] = self.new_light  #-1 since fixture number is 1 indexed not 0
+                        return True
+                    elif copy:
+                        self.new_copy_light = light.generate_new_light(x,y,channel_number,fixture_number,light_display_window,copy=True)
+                        self.copy_lights.append(self.new_copy_light)
                         return True
                     else:
                         return "There are overlapping channels"
@@ -88,8 +93,8 @@ class Light_display(QWidget):
         return [light.get_light_type() for light in self.lights_info]
 
 
-    def place_fixture(self,light_type,fixture_number,channel_number):
-        self.light_display_window.place_fixture(light_type,fixture_number,channel_number)
+    def place_fixture(self,light_type,fixture_number,channel_number,copy=False):
+        self.light_display_window.place_fixture(light_type,fixture_number,channel_number,copy)
 
     def setup_next_light_to_place(self):
         valid = len(self.lights_to_place)>0
@@ -108,8 +113,26 @@ class Light_display(QWidget):
             if light is not None:
                 if light.check_for_click(x,y):
                     self.run_slider_pannel_window(light)
-                # if x>light.x-light.clickable_region[0] and x < light.x+light.clickable_region[1]:
-                #     if y>light.y-light.clickable_region[2] and y<light.y+light.clickable_region[3]:
+        for light in self.copy_lights:
+            if light.check_for_click(x,y):
+                self.run_slider_pannel_window(light)
+
+    def delete_fixture(self,light):
+        #search if any copy lights first
+        fixture_number = light.get_fixture_number()
+        channel_number = light.get_channel_number()
+        channels = light.get_channels()
+        for l in self.copy_lights:
+            print(l)
+            if l == light:
+                pass
+            elif l.get_fixture_number() == fixture_number:
+                self.fixtures[fixture_number-1] = l
+                return
+        self.fixtures[fixture_number-1] = None
+        for i in range(len(channels)):
+            self.occupied_channels[channel_number+i-1] = None
+
 
     def preview_fixture(self,x,y,light_type,light_display_window):
         if self.preview_light:
