@@ -13,6 +13,13 @@ class Light_type(object):
         self.y = y
         self.copy = copy
 
+    def set_channel(self,channel_number,channel_value):
+        if channel_number > len(self.channels):
+            raise Exception("Channel out of range")
+        else:
+            self.channels[channel_number][1] = channel_value
+            self.update_display()
+
     def create_shapes(self): #creates the shapes for each part of the abstraction of the light
         pass
 
@@ -39,7 +46,7 @@ class Light_type(object):
     def get_channels(self):
         return self.channels
 
-    def is_copy():
+    def is_copy(self):
         return self.copy is True
 
     def get_light_type(self):

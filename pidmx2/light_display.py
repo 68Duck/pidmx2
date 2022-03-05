@@ -46,8 +46,29 @@ class Light_display(QWidget):
                 channel_number = fixture.get_channel_number()
                 for i,channel in enumerate(fixture.get_channels()):
                     self.set_dmx(channel_number+i,channel[1])
+                    for light in self.copy_lights:
+                        if light.get_channel_number() == fixture.get_channel_number() and light.get_fixture_number() == fixture.get_fixture_number():
+                            light.set_channel(i,channel[1])
 
-    def add_fixture(self,x,y,light_type,fixture_number,channel_number,light_display_window,copy=False):
+    def update_universe_from_copy_light(self,light):
+        for fixture in self.fixtures:
+            if fixture is not None:
+                if light.get_channel_number() == fixture.get_channel_number() and light.get_fixture_number() == fixture.get_fixture_number():
+                    channel_number = light.get_channel_number()
+                    for i,channel in enumerate(light.get_channels()):
+                        self.set_dmx(channel_number+i,channel[1])
+                        fixture.set_channel(i,channel[1])
+
+        for l in self.copy_lights:
+            if light.get_channel_number() == l.get_channel_number() and light.get_fixture_number() == l.get_fixture_number():
+                channel_number = light.get_channel_number()
+                for i,channel in enumerate(light.get_channels()):
+                    self.set_dmx(channel_number+i,channel[1])
+                    l.set_channel(i,channel[1])
+
+    def add_fixture(self,x,y,light_type,fixture_number,channel_number,light_display_window,copy=False,channels=None):
+        if self.preview_light:
+            self.preview_light.hide()
         if self.fixtures[fixture_number] is not None:
             return "Fixture is already taken"
         else:
@@ -56,7 +77,9 @@ class Light_display(QWidget):
                 if light.get_light_type() == light_type:
                     channels_valid = self.check_channels(start_channel = channel_number,no_channels=len(light.get_channels()))
                     if channels_valid:
-                        self.new_light = light.generate_new_light(x,y,channel_number,fixture_number,light_display_window)
+                        self.new_light = light.generate_new_light(x,y,channel_number,fixture_number,light_display_window,copy=False)
+                        if channels is not None:
+                            self.new_light.set_channels(channels)
                         self.fixtures[fixture_number-1] = self.new_light #-1 since fixture number is 1 indexed not 0
                         for i in range(len(light.channels)):
                             self.occupied_channels[channel_number+i-1] = self.new_light  #-1 since fixture number is 1 indexed not 0
@@ -64,6 +87,12 @@ class Light_display(QWidget):
                     elif copy:
                         self.new_copy_light = light.generate_new_light(x,y,channel_number,fixture_number,light_display_window,copy=True)
                         self.copy_lights.append(self.new_copy_light)
+                        for fixture in self.fixtures:
+                            if fixture is not None:
+                                if self.new_copy_light.get_channel_number() == fixture.get_channel_number() and self.new_copy_light.get_fixture_number() == fixture.get_fixture_number():
+                                    channel_number = fixture.get_channel_number()
+                                    for i,channel in enumerate(fixture.get_channels()):
+                                        self.new_copy_light.set_channel(i,channel[1])
                         return True
                     else:
                         return "There are overlapping channels"
@@ -93,8 +122,8 @@ class Light_display(QWidget):
         return [light.get_light_type() for light in self.lights_info]
 
 
-    def place_fixture(self,light_type,fixture_number,channel_number,copy=False):
-        self.light_display_window.place_fixture(light_type,fixture_number,channel_number,copy)
+    def place_fixture(self,light_type,fixture_number,channel_number,copy=False,channels=None):
+        self.light_display_window.place_fixture(light_type,fixture_number,channel_number,copy,channels)
 
     def setup_next_light_to_place(self):
         valid = len(self.lights_to_place)>0
@@ -122,16 +151,19 @@ class Light_display(QWidget):
         fixture_number = light.get_fixture_number()
         channel_number = light.get_channel_number()
         channels = light.get_channels()
-        for l in self.copy_lights:
-            print(l)
-            if l == light:
-                pass
-            elif l.get_fixture_number() == fixture_number:
-                self.fixtures[fixture_number-1] = l
-                return
-        self.fixtures[fixture_number-1] = None
-        for i in range(len(channels)):
-            self.occupied_channels[channel_number+i-1] = None
+        if light.is_copy() and light not in self.fixtures:
+            self.copy_lights.remove(light)
+        else:
+            for l in self.copy_lights:
+                if l.get_fixture_number() == fixture_number:
+                    self.fixtures[fixture_number-1] = l
+                    self.copy_lights.remove(l)
+                    return
+            #if reaches here then there are no copy lights so the light should be deleted completely
+            self.fixtures[fixture_number-1] = None
+            for i in range(len(channels)):
+                self.occupied_channels[channel_number+i-1] = None
+
 
 
     def preview_fixture(self,x,y,light_type,light_display_window):
@@ -139,7 +171,7 @@ class Light_display(QWidget):
             self.preview_light.hide()
         for light in self.lights_info:
             if light.get_light_type() == light_type:
-                self.preview_light = light.generate_new_light(x,y,None,None,light_display_window)
+                self.preview_light = light.generate_new_light(x,y,None,None,light_display_window,False)
 
     def get_no_channels(self,light_type):
         for light in self.lights_info:

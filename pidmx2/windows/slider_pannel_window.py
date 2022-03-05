@@ -34,9 +34,10 @@ class Slider_pannel_window(QWidget,uic.loadUiType(os.path.join("windows/ui","sli
         self.close()
 
     def move_fixture_button_pressed(self):
+        channels = self.get_channel_values()
         self.light.hide()
         self.delete_fixture()
-        self.light_display.place_fixture(self.light.get_light_type(),self.light.get_fixture_number(),self.light.get_channel_number())
+        self.light_display.place_fixture(self.light.get_light_type(),self.light.get_fixture_number(),self.light.get_channel_number(),copy=True,channels=channels)
         self.close()
 
     def remove_fixture_button_pressed(self):
@@ -135,7 +136,10 @@ class Slider_pannel_window(QWidget,uic.loadUiType(os.path.join("windows/ui","sli
 
     def channels_changed(self):
         self.light.set_channels(self.get_channel_values())
-        self.light_display.update_universe_from_fixtures()
+        if self.light.is_copy():
+            self.light_display.update_universe_from_copy_light(self.light)
+        else:
+            self.light_display.update_universe_from_fixtures()
 
     def select_button_pressed(self):
         select_button = self.sender()
