@@ -8,8 +8,9 @@ from open_window import Open_window
 
 
 class Open_rig_window(Open_window):
-    def __init__(self):
+    def __init__(self,light_display):
         super().__init__()
+        self.light_display = light_display
         self.setWindowTitle("Open Rig Window")
 
 

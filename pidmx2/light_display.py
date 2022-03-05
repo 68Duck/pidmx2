@@ -19,6 +19,7 @@ from windows.raspberry_pi_password_input_window import Raspberry_pi_password_inp
 from windows.error_window import Error_window
 from windows.patching_window import Patching_window
 from windows.slider_pannel_window import Slider_pannel_window
+from windows.fixture_faders_window import Fixture_faders_window
 
 
 class Light_display(QWidget):
@@ -39,6 +40,24 @@ class Light_display(QWidget):
         self.lights_to_place = []
         self.lights_info = [Generic_dimmer(None,None,None,None,None,None),RGBW_light(None,None,None,None,None,None),RGB_light(None,None,None,None,None,None),Miniscan(None,None,None,None,None,None),LED_bar_24_channel(None,None,None,None,None,None)]
         self.copy_lights = []
+        self.fixture_faders_window = Fixture_faders_window(self)
+
+
+    def update_intensities(self,intensities):
+        if len(intensities) != len(self.fixtures):
+            raise Exception("Intensities and fixtures should be the same length")
+        for i in range(len(self.fixtures)):
+            if self.fixtures[i] != None:
+                self.fixtures[i].set_intensity(intensities[i])
+                for l in self.copy_lights:
+                    if i+1 == fixture_number:
+                        l.set_intensity(intensities[i])
+        try:
+            self.slider_pannel_window.change_sliders_from_light()
+        except Exception as e:
+            # print(e)
+            pass
+
 
     def update_universe_from_fixtures(self):
         for fixture in self.fixtures:
@@ -49,6 +68,7 @@ class Light_display(QWidget):
                     for light in self.copy_lights:
                         if light.get_channel_number() == fixture.get_channel_number() and light.get_fixture_number() == fixture.get_fixture_number():
                             light.set_channel(i,channel[1])
+        self.fixture_faders_window.update_faders(self.fixtures)
 
     def update_universe_from_copy_light(self,light):
         for fixture in self.fixtures:
@@ -65,6 +85,7 @@ class Light_display(QWidget):
                 for i,channel in enumerate(light.get_channels()):
                     self.set_dmx(channel_number+i,channel[1])
                     l.set_channel(i,channel[1])
+        self.fixture_faders_window.update_faders(self.fixtures)
 
     def add_fixture(self,x,y,light_type,fixture_number,channel_number,light_display_window,copy=False,channels=None):
         if self.preview_light:
@@ -83,6 +104,7 @@ class Light_display(QWidget):
                         self.fixtures[fixture_number-1] = self.new_light #-1 since fixture number is 1 indexed not 0
                         for i in range(len(light.channels)):
                             self.occupied_channels[channel_number+i-1] = self.new_light  #-1 since fixture number is 1 indexed not 0
+                        self.fixture_faders_window.update_faders(self.fixtures)
                         return True
                     elif copy:
                         self.new_copy_light = light.generate_new_light(x,y,channel_number,fixture_number,light_display_window,copy=True)
@@ -93,6 +115,7 @@ class Light_display(QWidget):
                                     channel_number = fixture.get_channel_number()
                                     for i,channel in enumerate(fixture.get_channels()):
                                         self.new_copy_light.set_channel(i,channel[1])
+                        self.fixture_faders_window.update_faders(self.fixtures)
                         return True
                     else:
                         return "There are overlapping channels"
@@ -163,6 +186,7 @@ class Light_display(QWidget):
             self.fixtures[fixture_number-1] = None
             for i in range(len(channels)):
                 self.occupied_channels[channel_number+i-1] = None
+            self.fixture_faders_window.update_faders(self.fixtures)
 
 
 
@@ -271,6 +295,13 @@ class Light_display(QWidget):
     def run_patching_window(self):
         self.patching_window = Patching_window(self)
         self.patching_window.show()
+
+    def run_fixture_faders_window(self):
+        self.fixture_faders_window.show()
+        self.fixture_faders_window.update_faders(self.fixtures)
+        monitor = QDesktopWidget().screenGeometry(1)
+        self.fixture_faders_window.move(monitor.left(), monitor.top())
+        self.fixture_faders_window.showMaximized()
 
     def raspberry_pi_login(self,password):
         self.raspberry_pi_password = password

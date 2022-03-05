@@ -13,6 +13,7 @@ class Slider_pannel_window(QWidget,uic.loadUiType(os.path.join("windows/ui","sli
         self.light = light
         self.light_display = light_display
         self.channels_names = [channel[0] for channel in self.light.get_channels()]
+        self.changing_channels = True
         self.initUI()
 
     def initUI(self):
@@ -102,6 +103,15 @@ class Slider_pannel_window(QWidget,uic.loadUiType(os.path.join("windows/ui","sli
 
         self.sliders.append(dict)
 
+    def change_sliders_from_light(self):
+        if len(self.light.get_channels()) != len(self.sliders):
+            raise Exception("There should be the same number of sliders as channels")
+        self.changing_channels = False
+        for i in range(len(self.light.get_channels())):
+            self.sliders[i]["slider"].setValue(self.light.get_channels()[i][1])
+        self.changing_channels = True
+
+
     def spin_box_changed_value(self):
         spin_box = self.sender()
         s = None
@@ -122,7 +132,8 @@ class Slider_pannel_window(QWidget,uic.loadUiType(os.path.join("windows/ui","sli
         if s is None:
             raise Exception("Slider could not be found")
         else:
-            self.channels_changed()
+            if self.changing_channels:
+                self.channels_changed()
 
     def get_channel_values(self):
         channel_values = []

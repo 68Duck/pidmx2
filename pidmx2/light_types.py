@@ -2,6 +2,7 @@ from PyQt5 import QtWidgets,uic
 from PyQt5.QtWidgets import*
 from PyQt5.QtGui import*
 from PyQt5.QtCore import*
+import math as maths
 
 class Light_type(object):
     def __init__(self,x,y,channel_number,fixture_number,light_display_window,copy):
@@ -12,6 +13,7 @@ class Light_type(object):
         self.x = x
         self.y = y
         self.copy = copy
+        self.intensity = 0
 
     def set_channel(self,channel_number,channel_value):
         if channel_number > len(self.channels):
@@ -36,11 +38,11 @@ class Light_type(object):
     def set_channels(self,channels): #add more validation?
         if len(channels) == len(self.channels):
             self.channels = channels
-            self.update_display()
+            self.update_display(change_colour=True)
         else:
             raise Exception("The channels given are not of the same length. Please try again")
 
-    def update_display(self):
+    def update_display(self,change_colour=False):
         pass #changes the display to the value of the channels so intensity etc.
 
     def get_channels(self):
@@ -58,11 +60,24 @@ class Light_type(object):
     def get_fixture_number(self):
         return self.fixture_number
 
+    def get_intensity(self):
+        return self.intensity
+
+    def set_intensity(self,intensity): #fix me
+        self.intensity = intensity
+        self.update_channels_from_intensity()
+        self.update_display()
+
+    def update_channels_from_intensity(self):
+        pass
+
     def check_for_click(self,x,y):
         if x>self.x-self.clickable_region[0] and x < self.x+self.clickable_region[1]:
             if y>self.y-self.clickable_region[2] and y<self.y+self.clickable_region[3]:
                 return True
         return False
+
+
 
 
 class Generic_dimmer(Light_type):
@@ -100,9 +115,12 @@ class Generic_dimmer(Light_type):
     def generate_new_light(self,x,y,channel_number,fixture_number,light_display_window,copy):
         return Generic_dimmer(x,y,channel_number,fixture_number,light_display_window,copy)
 
-    def update_display(self):
-        intensity = self.channels[0][1]
-        self.indicator.setStyleSheet(f'background-color: rgba(255,255,0,{intensity/255});')
+    def update_display(self,change_colour=False):
+        self.intensity = self.channels[0][1]
+        self.indicator.setStyleSheet(f'background-color: rgba(255,255,0,{self.intensity/255});')
+
+    def update_channels_from_intensity(self):
+        self.channels[0][1] = self.intensity
 
 class RGBW_light(Light_type):
     def __init__(self,x,y,channel_number,fixture_number,light_display_window,copy):
@@ -110,6 +128,7 @@ class RGBW_light(Light_type):
         self.channels = [["Red",0],["Green",0],["Blue",0],["White",0]]
         self.light_type = "RGBW_light"
         self.clickable_region = [40,40,40,40] #in the order left right top bottom from x,y
+        self.colour = [0,0,0,0]
         if self.light_display_window is not None:
             self.shapes = self.create_shapes()
             self.move()
@@ -144,16 +163,42 @@ class RGBW_light(Light_type):
     def generate_new_light(self,x,y,channel_number,fixture_number,light_display_window,copy):
         return RGBW_light(x,y,channel_number,fixture_number,light_display_window,copy)
 
-    def update_display(self):
+    def update_display(self,change_colour=False):
         red = self.channels[0][1]
         green = self.channels[1][1]
         blue = self.channels[2][1]
         white = self.channels[3][1]
+        if change_colour:
+            self.colour = [red,green,blue,white]
+        self.intensity = max(red,green,blue,white)
         red = min(255,red+white) #done to incorperate the white into the display but does not affect the real sending of data
         green = min(255,green+white)
         blue = min(255,blue+white)
         for i in range(5):
             self.shapes[1+i].setStyleSheet(f'background-color: rgba({red},{green},{blue},1); border-radius: {self.circle1.borderWidth}px;border: 3px solid rgba({red},{green},{blue},1);')  #all borderwidths should be the same
+
+    def update_channels_from_intensity(self):
+        red, green, blue, white = self.colour
+        if red > 0:
+            r = maths.floor(red/max(red,green,blue,white)*self.intensity)
+        else:
+            r=0
+        if green > 0:
+            g = maths.floor(green/max(red,green,blue,white)*self.intensity)
+        else:
+            g=0
+        if blue > 0:
+            b = maths.floor(blue/max(red,green,blue,white)*self.intensity)
+        else:
+            b=0
+        if white > 0:
+            w = maths.floor(white/max(red,green,blue,white)*self.intensity)
+        else:
+            w=0
+        self.channels[0][1] = r
+        self.channels[1][1] = g
+        self.channels[2][1] = b
+        self.channels[3][1] = self.intensity if max(red,green,blue) == 0 else w
 
 
 class RGB_light(Light_type):
@@ -162,6 +207,7 @@ class RGB_light(Light_type):
         self.channels = [["Intensity",0],["Red",0],["Green",0],["Blue",0]]
         self.light_type = "RGB_light"
         self.clickable_region = [40,40,40,40] #in the order left right top bottom from x,y
+        self.colour = [0,0,0]
         if self.light_display_window is not None:
             self.shapes = self.create_shapes()
             self.move()
@@ -196,15 +242,37 @@ class RGB_light(Light_type):
     def generate_new_light(self,x,y,channel_number,fixture_number,light_display_window,copy):
         return RGB_light(x,y,channel_number,fixture_number,light_display_window,copy)
 
-    def update_display(self):
-        intensity = self.channels[0][1]
+    def update_display(self,change_colour=False):
+        self.intensity = self.channels[0][1]
         red = self.channels[1][1]
         green = self.channels[2][1]
         blue = self.channels[3][1]
+        self.intensity = max(self.intensity,red,green,blue)
+        if change_colour:
+            self.colour = [red,green,blue]
         for i in range(5):
-            self.shapes[1+i].setStyleSheet(f'background-color: rgba({red},{green},{blue},{intensity}); border-radius: {self.circle1.borderWidth}px;border: 3px solid rgba({red},{green},{blue},{intensity});')  #all borderwidths should be the same
+            self.shapes[1+i].setStyleSheet(f'background-color: rgba({red},{green},{blue},{self.intensity}); border-radius: {self.circle1.borderWidth}px;border: 3px solid rgba({red},{green},{blue},{self.intensity});')  #all borderwidths should be the same
 
-
+    def update_channels_from_intensity(self):
+        if max(self.colour) == 0:
+            self.colour = [255]*3
+        self.channels[0][1] = self.intensity
+        red, green, blue = self.colour
+        if red > 0:
+            r = maths.floor(red/max(red,green,blue)*self.intensity)
+        else:
+            r=0
+        if green > 0:
+            g = maths.floor(green/max(red,green,blue)*self.intensity)
+        else:
+            g=0
+        if blue > 0:
+            b = maths.floor(blue/max(red,green,blue)*self.intensity)
+        else:
+            b=0
+        self.channels[1][1] = r
+        self.channels[2][1] = g
+        self.channels[3][1] = b
 
 class Miniscan(Light_type):
     def __init__(self,x,y,channel_number,fixture_number,light_display_window,copy):
@@ -244,16 +312,19 @@ class Miniscan(Light_type):
     def generate_new_light(self,x,y,channel_number,fixture_number,light_display_window,copy):
         return Miniscan(x,y,channel_number,fixture_number,light_display_window,copy)
 
-    def update_display(self):
-        intensity = self.channels[3][1]
-        self.indicator.setStyleSheet(f'background-color: rgba(255,255,0,{intensity/255});')
+    def update_display(self,change_colour=False):
+        self.intensity = self.channels[3][1]
+        self.indicator.setStyleSheet(f'background-color: rgba(255,255,0,{self.intensity/255});')
 
+    def update_channels_from_intensity(self):
+        self.channels[3][1] = self.intensity
 
 class LED_bar_24_channel(Light_type):
     def __init__(self,x,y,channel_number,fixture_number,light_display_window,copy):
         super().__init__(x,y,channel_number,fixture_number,light_display_window,copy)
         self.channels = self.setup_channels()
         self.light_type = "LED_bar_24_channel"
+        self.colour = [0]*24
         self.clickable_region = [0,20,0,175] #in the order left right top bottom from x,y
         if self.light_display_window is not None:
             self.shapes = self.create_shapes()
@@ -290,7 +361,18 @@ class LED_bar_24_channel(Light_type):
     def generate_new_light(self,x,y,channel_number,fixture_number,light_display_window,copy):
         return LED_bar_24_channel(x,y,channel_number,fixture_number,light_display_window,copy)
 
-    def update_display(self):
+    def update_display(self,change_colour=False):
+        self.intensity = max([channel[1] for channel in self.channels])
+        if change_colour:
+            self.colour = [channel[1] for channel in self.channels]
         for i in range(1,9,1):
             box = getattr(self,f"box{i}")
             box.setStyleSheet(f"background-color: rgba({self.channels[(i-1)*3][1]},{self.channels[(i-1)*3+1][1]},{self.channels[(i-1)*3+2][1]},1)")
+
+    def update_channels_from_intensity(self):
+        if max(self.colour) == 0:
+            self.colour = [1]*24
+        for i,c in enumerate(self.colour):
+            if c > 0:
+                c = maths.floor(c/max(self.colour)*self.intensity)
+                self.channels[i][1] = c

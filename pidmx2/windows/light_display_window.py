@@ -22,6 +22,10 @@ class Light_display_window(QMainWindow,uic.loadUiType(os.path.join("windows/ui",
     def initUI(self):
         self.mode_selection_action.triggered.connect(self.mode_selection_pressed)
         self.patch_action.triggered.connect(self.patch_pressed)
+        self.fixture_faders_action.triggered.connect(self.fixture_faders_pressed)
+
+    def fixture_faders_pressed(self):
+        self.light_display.run_fixture_faders_window()
 
     def patch_pressed(self):
         self.light_display.run_patching_window()
