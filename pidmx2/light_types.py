@@ -63,6 +63,12 @@ class Light_type(object):
     def get_intensity(self):
         return self.intensity
 
+    def get_x(self):
+        return self.x
+
+    def get_y(self):
+        return self.y
+
     def set_intensity(self,intensity): #fix me
         self.intensity = intensity
         self.update_channels_from_intensity()

@@ -18,6 +18,10 @@ class Message_window(QWidget,uic.loadUiType(os.path.join("windows/ui","message_w
         self.message_label.setText(self.message)
         self.ok_button.clicked.connect(self.close)
 
+    def keyPressEvent(self,e):
+        if e.key() == Qt.Key_Return:
+            self.close()
+
 
 
 

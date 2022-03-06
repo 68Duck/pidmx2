@@ -16,7 +16,7 @@ class Database_manager(object):
     def get_db(self):
         file_directory = path.dirname(__file__)
         database_file_directory = path.join(file_directory,"databases")
-        con = lite.connect(path.join(database_file_directory,self.DATABASE),isolation_level=None)
+        con = lite.connect(path.join(database_file_directory,self.DATABASE),isolation_level=None) #change back to after path.join ,isolation_level=None if logon stops working
         con.execute("PRAGMA foreign_keys = 1")
         return con
 
@@ -115,6 +115,7 @@ class Database_manager(object):
     	"xpos"	INTEGER NOT NULL,
     	"ypos"	INTEGER NOT NULL,
     	"start_channel"	INTEGER NOT NULL,
+    	"fixture_number"	INTEGER NOT NULL,
     	PRIMARY KEY("light_id" AUTOINCREMENT)
         )""")
 

@@ -29,8 +29,12 @@ Check pressing enter for ok/submit if present for all windows
 Possibly put in stakeholder input that the logon/create account is not obvious what to input. Also make password input dots.
 Also for stakeholder input add extra faders since 24 is not that many
 
-Add confirm window to slider panel window removing light
+Add confirm window to slider panel window removing light and deleting rigs for open_rig window
 
 For testing logon window try to fix invalid characters test since no characters are invalid?
 
-Check if slider pannel window needs the select buttons since not used?
+Check if slider pannel window needs the select buttons since not used? Same with fixture faders window
+
+Potentially change saving rig names since rigs can be of the same name if they are within different accounts.
+
+Make sure all sections are tested to the test plan 

@@ -10,7 +10,3 @@ class Open_window(QWidget,uic.loadUiType(os.path.join("windows/ui","open_window.
         super().__init__()
         self.setupUi(self)
         self.setWindowTitle("Open Window")
-        self.initUI()
-
-    def initUI(self):
-        pass

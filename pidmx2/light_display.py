@@ -20,6 +20,8 @@ from windows.error_window import Error_window
 from windows.patching_window import Patching_window
 from windows.slider_pannel_window import Slider_pannel_window
 from windows.fixture_faders_window import Fixture_faders_window
+from windows.open_rig_window import Open_rig_window
+from windows.save_rig_window import Save_rig_window
 
 
 class Light_display(QWidget):
@@ -50,7 +52,7 @@ class Light_display(QWidget):
             if self.fixtures[i] != None:
                 self.fixtures[i].set_intensity(intensities[i])
                 for l in self.copy_lights:
-                    if i+1 == fixture_number:
+                    if i+1 == l.get_fixture_number():
                         l.set_intensity(intensities[i])
         try:
             self.slider_pannel_window.change_sliders_from_light()
@@ -303,6 +305,14 @@ class Light_display(QWidget):
         self.fixture_faders_window.move(monitor.left(), monitor.top())
         self.fixture_faders_window.showMaximized()
 
+    def run_open_rig_window(self):
+        self.open_rig_window = Open_rig_window(self,self.database_manager)
+        self.open_rig_window.show()
+
+    def run_save_rig_window(self):
+        self.save_rig_window = Save_rig_window(self,self.database_manager)
+        self.save_rig_window.show()
+
     def raspberry_pi_login(self,password):
         self.raspberry_pi_password = password
         self.running_raspberry_pi_dmx = True
@@ -330,8 +340,39 @@ class Light_display(QWidget):
         except:
             return False
 
+    def get_account_id(self):
+        try:
+            account_id = self.database_manager.query_db("SELECT account_id FROM Accounts WHERE username=?",(self.username,))[0]["account_id"]
+            return account_id
+        except:
+            return False
+
 
     def logged_in(self,username):
         self.username = username
         self.logon_window.close()
         self.run_mode_selection_window()
+
+    def get_fixtures(self):
+        return self.fixtures
+
+    def get_copy_lights(self):
+        return self.copy_lights
+
+    def open_rig(self,fixtures):
+        for f in self.fixtures:
+            if f is not None:
+                f.hide()
+        for c in self.copy_lights:
+            c.hide()
+        self.fixtures = [None]*24
+        self.occupied_channels = [None]*512
+        self.copy_lights = []
+        for fixture in fixtures:
+            copy = False
+            for f in self.fixtures:
+                if f is not None:
+                    if f.get_fixture_number() == fixture["fixture_number"]:
+                        copy = True
+            self.add_fixture(fixture["xpos"],fixture["ypos"],fixture["light_type"],fixture["fixture_number"],fixture["start_channel"],self.light_display_window,copy)
+        self.fixture_faders_window.update_faders(self.fixtures)

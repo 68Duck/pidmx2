@@ -29,6 +29,14 @@ class Fixture_faders_window(QWidget,uic.loadUiType(os.path.join("windows/ui","fi
                 self.faders[i]["spin_box"].setValue(fixture.get_intensity())
                 self.faders[i]["slider"].setValue(fixture.get_intensity())
                 self.changing_channels = True
+            else:
+                self.changing_channels = False
+                self.faders[i]["slider"].setStyleSheet("QSlider::handle {background-color: #292C34;}")
+                self.faders[i]["label"].setStyleSheet("background-color:red;")
+                self.faders[i]["label"].setText("Fixture" + str(i+1))
+                self.faders[i]["spin_box"].setValue(0)
+                self.faders[i]["slider"].setValue(0)
+                self.changing_channels = True
 
     def create_fader(self,fader_number,x,y,start_value):
         dict = {}
