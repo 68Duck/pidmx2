@@ -34,7 +34,7 @@ class Open_rig_window(Open_window):
         else:
             rig_id_dict = self.database_manager.query_db("SELECT rig_id FROM Rigs WHERE rig_name = ?",(rig_name,))
             if len(rig_id_dict) == 0:
-                raise Exception("Rig id could not be found")
+                self.error_window = Error_window("No rigs exist for this account. Please save a rig first.")
             else:
                 rig_id = rig_id_dict[0]["rig_id"]
                 light_ids = self.database_manager.query_db("SELECT light_id from Lights_in_rigs WHERE rig_id = ?",(rig_id,))
