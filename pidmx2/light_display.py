@@ -22,6 +22,7 @@ from windows.slider_pannel_window import Slider_pannel_window
 from windows.fixture_faders_window import Fixture_faders_window
 from windows.open_rig_window import Open_rig_window
 from windows.save_rig_window import Save_rig_window
+from windows.select_light_type_window import Select_light_type_window
 
 
 class Light_display(QWidget):
@@ -92,7 +93,7 @@ class Light_display(QWidget):
     def add_fixture(self,x,y,light_type,fixture_number,channel_number,light_display_window,copy=False,channels=None):
         if self.preview_light:
             self.preview_light.hide()
-        if self.fixtures[fixture_number] is not None:
+        if self.fixtures[fixture_number-1] is not None:
             return "Fixture is already taken"
         else:
             self.new_light = None
@@ -117,6 +118,8 @@ class Light_display(QWidget):
                                     channel_number = fixture.get_channel_number()
                                     for i,channel in enumerate(fixture.get_channels()):
                                         self.new_copy_light.set_channel(i,channel[1])
+                                    if fixture.is_selected():
+                                        self.new_copy_light.toggle_selected()
                         self.fixture_faders_window.update_faders(self.fixtures)
                         return True
                     else:
@@ -124,6 +127,8 @@ class Light_display(QWidget):
         return f"No light with {light_type} type exists"
 
     def check_new_fixture(self,light_type,fixture_number,channel_number):
+        if fixture_number > len(self.fixtures) or fixture_number < 1:
+            return "The fixture number is not in the correct range"
         if self.fixtures[fixture_number-1] is not None: #-1 since fixture number is 1 indexed not 0
             return "There is already a fixture with that number. Please try again"
         else:
@@ -170,6 +175,26 @@ class Light_display(QWidget):
         for light in self.copy_lights:
             if light.check_for_click(x,y):
                 self.run_slider_pannel_window(light)
+
+    def check_for_light_select(self,x,y):
+        for fixture in self.fixtures:
+            if fixture is not None:
+                if fixture.check_for_click(x,y):
+                    fixture.toggle_selected()
+                for light in self.copy_lights:
+                    if fixture.get_fixture_number() == light.get_fixture_number():
+                        light.toggle_selected()
+
+        for light in self.copy_lights:
+            if light.check_for_click(x,y):
+                light.toggle_selected()
+                for fixture in self.fixtures:
+                    if fixture is not None:
+                        if fixture.get_fixture_number() == light.get_fixture_number():
+                            fixture.toggle_selected()
+                for l in self.copy_lights:
+                    if l.get_fixture_number() == light.get_fixture_number():
+                        l.toggle_selected()
 
     def delete_fixture(self,light):
         #search if any copy lights first
@@ -312,6 +337,23 @@ class Light_display(QWidget):
     def run_save_rig_window(self):
         self.save_rig_window = Save_rig_window(self,self.database_manager)
         self.save_rig_window.show()
+
+    def run_select_light_type_window(self):
+        self.select_light_type_window = Select_light_type_window(self)
+        self.select_light_type_window.show()
+
+    def select_light_type(self,light_type):
+        for fixture in self.fixtures:
+            if fixture is not None:
+                if fixture.get_light_type() == light_type and not fixture.is_selected():
+                    fixture.toggle_selected()
+
+    def update_fixture_faders_selected_buttons(self):
+        self.fixture_faders_window.update_select_buttons(self.fixtures)
+
+    def toggle_fixture(self,fixture_number):
+        if self.fixtures[fixture_number-1] is not None:
+            self.fixtures[fixture_number-1].toggle_selected(update_faders=False)
 
     def raspberry_pi_login(self,password):
         self.raspberry_pi_password = password

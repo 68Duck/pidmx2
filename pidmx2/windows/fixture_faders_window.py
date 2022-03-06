@@ -62,6 +62,7 @@ class Fixture_faders_window(QWidget,uic.loadUiType(os.path.join("windows/ui","fi
         font.setPointSize(12)
         select_button.setFont(font)
         select_button.setStyleSheet("border: 1px solid white;border-radius: 5px;background-color: #292C34;color: white;")
+        select_button.number = fader_number
         dict["select_button"] = select_button
 
         new_label = QLabel(self,wordWrap=True)
@@ -123,7 +124,20 @@ class Fixture_faders_window(QWidget,uic.loadUiType(os.path.join("windows/ui","fi
 
     def select_button_pressed(self):
         select_button = self.sender()
-        if select_button.isChecked():
-            select_button.setStyleSheet("border: 1px solid white;border-radius: 5px;background-color: yellow;color: black;")
-        else:
-            select_button.setStyleSheet("border: 1px solid white;border-radius: 5px;background-color: #292C34;color: white;")
+        if self.light_display.get_fixtures()[select_button.number-1] is not None:
+            self.light_display.toggle_fixture(select_button.number)
+            if select_button.isChecked():
+                select_button.setStyleSheet("border: 1px solid white;border-radius: 5px;background-color: yellow;color: black;")
+            else:
+                select_button.setStyleSheet("border: 1px solid white;border-radius: 5px;background-color: #292C34;color: white;")
+
+    def update_select_buttons(self,fixtures):
+        for fixture in fixtures:
+            if fixture is not None:
+                select_button = self.faders[fixture.get_fixture_number()-1]["select_button"]
+                if fixture.is_selected():
+                    select_button.setChecked(True)
+                    select_button.setStyleSheet("border: 1px solid white;border-radius: 5px;background-color: yellow;color: black;")
+                else:
+                    select_button.setChecked(False)
+                    select_button.setStyleSheet("border: 1px solid white;border-radius: 5px;background-color: #292C34;color: white;")

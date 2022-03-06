@@ -68,7 +68,6 @@ QPushButton{background-color:white;border-radius:5px;}</string>
     <addaction name="select_lights_action"/>
     <addaction name="select_all_lights_action"/>
     <addaction name="select_light_type_action"/>
-    <addaction name="choose_colour_action"/>
    </widget>
    <widget class="QMenu" name="menuRig">
     <property name="title">
@@ -132,11 +131,17 @@ QPushButton{background-color:white;border-radius:5px;}</string>
    </property>
   </action>
   <action name="select_lights_action">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Select Lights</string>
    </property>
   </action>
   <action name="select_all_lights_action">
+   <property name="checkable">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Select All Lights</string>
    </property>

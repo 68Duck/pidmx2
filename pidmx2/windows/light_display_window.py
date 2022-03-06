@@ -17,6 +17,7 @@ class Light_display_window(QMainWindow,uic.loadUiType(os.path.join("windows/ui",
         self.database_manager = database_manager
         self.setMouseTracking(True)
         self.placing_light = False
+        self.selecting_lights = False
         self.initUI()
 
     def initUI(self):
@@ -25,6 +26,21 @@ class Light_display_window(QMainWindow,uic.loadUiType(os.path.join("windows/ui",
         self.fixture_faders_action.triggered.connect(self.fixture_faders_pressed)
         self.open_rig_action.triggered.connect(self.open_rig_pressed)
         self.save_rig_action.triggered.connect(self.save_rig_pressed)
+        self.select_lights_action.triggered.connect(self.select_lights_pressed)
+        self.select_all_lights_action.triggered.connect(self.select_all_lights_pressed)
+        self.select_light_type_action.triggered.connect(self.select_light_type_pressed)
+
+    def select_all_lights_pressed(self):
+        for fixture in self.light_display.get_fixtures():
+            if fixture is not None:
+                if not fixture.is_selected():
+                    fixture.toggle_selected()
+
+    def select_light_type_pressed(self):
+        self.light_display.run_select_light_type_window()
+
+    def select_lights_pressed(self):
+        self.selecting_lights = self.select_lights_action.isChecked()
 
     def save_rig_pressed(self):
         self.light_display.run_save_rig_window()
@@ -64,9 +80,14 @@ class Light_display_window(QMainWindow,uic.loadUiType(os.path.join("windows/ui",
             if source == self: #only want to detect mouse clicks on the light display window
                 if event.type() == QEvent.MouseButtonPress:
                     if event.buttons() == Qt.LeftButton:
-                        x = event.x()
-                        y = event.y()
-                        self.light_display.check_for_light_click(x,y)
+                        if self.selecting_lights:
+                            x = event.x()
+                            y = event.y()
+                            self.light_display.check_for_light_select(x,y)
+                        else:
+                            x = event.x()
+                            y = event.y()
+                            self.light_display.check_for_light_click(x,y)
 
         return super(Light_display_window, self).eventFilter(source, event)
 

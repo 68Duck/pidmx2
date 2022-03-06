@@ -14,6 +14,7 @@ class Light_type(object):
         self.y = y
         self.copy = copy
         self.intensity = 0
+        self.selected = False
 
     def set_channel(self,channel_number,channel_value):
         if channel_number > len(self.channels):
@@ -69,7 +70,10 @@ class Light_type(object):
     def get_y(self):
         return self.y
 
-    def set_intensity(self,intensity): #fix me
+    def is_selected(self):
+        return self.selected
+
+    def set_intensity(self,intensity):
         self.intensity = intensity
         self.update_channels_from_intensity()
         self.update_display()
@@ -82,6 +86,15 @@ class Light_type(object):
             if y>self.y-self.clickable_region[2] and y<self.y+self.clickable_region[3]:
                 return True
         return False
+
+    def toggle_selected(self,update_faders=True):
+        self.selected = not self.selected
+        if self.selected:
+            self.select_shape.show()
+        else:
+            self.select_shape.hide()
+        if update_faders:
+            self.light_display_window.light_display.update_fixture_faders_selected_buttons()
 
 
 
@@ -100,7 +113,15 @@ class Generic_dimmer(Light_type):
         self.border = self.create_shape(self.x,self.y,35,75,border=True)
         self.box = self.create_shape(self.x+5,self.y+5,25,65)
         self.indicator = self.create_shape(self.x+5,self.y,25,20)
-        return [self.border,self.box,self.indicator]
+        self.select_shape = self.create_select_shape()
+        return [self.border,self.box,self.indicator,self.select_shape]
+
+    def create_select_shape(self):
+        select_shape = QLabel(self.light_display_window)
+        select_shape.move(self.x-5,self.y-5)
+        select_shape.setStyleSheet("border: 1px solid orange; background-color:transparent")
+        select_shape.setFixedSize(45,85)
+        return select_shape
 
     def move(self):
         self.border.move(self.x,self.y)
@@ -144,7 +165,16 @@ class RGBW_light(Light_type):
         self.border = self.create_shape(self.x-35,self.y-35,80,80,20)
         for i in range(1,6,1):
             setattr(self,f"circle{i}",self.create_shape(self.x,self.y,10,10,int(10/2),True))
-        return [self.border,self.circle1,self.circle2,self.circle3,self.circle4,self.circle5]
+        self.select_shape = self.create_select_shape()
+        return [self.border,self.circle1,self.circle2,self.circle3,self.circle4,self.circle5,self.select_shape]
+
+    def create_select_shape(self):
+        select_shape = QLabel(self.light_display_window)
+        select_shape.move(self.x-40,self.y-40)
+        select_shape.setStyleSheet("border: 1px solid orange; background-color:transparent")
+        select_shape.setFixedSize(90,90)
+        return select_shape
+
 
     def move(self):
         self.circle1.move(self.x,self.y)
@@ -223,7 +253,15 @@ class RGB_light(Light_type):
         self.border = self.create_shape(self.x-35,self.y-35,80,80,20)
         for i in range(1,6,1):
             setattr(self,f"circle{i}",self.create_shape(self.x,self.y,10,10,int(10/2),True))
-        return [self.border,self.circle1,self.circle2,self.circle3,self.circle4,self.circle5]
+        self.select_shape = self.create_select_shape()
+        return [self.border,self.circle1,self.circle2,self.circle3,self.circle4,self.circle5,self.select_shape]
+
+    def create_select_shape(self):
+        select_shape = QLabel(self.light_display_window)
+        select_shape.move(self.x-40,self.y-40)
+        select_shape.setStyleSheet("border: 1px solid orange; background-color:transparent")
+        select_shape.setFixedSize(90,90)
+        return select_shape
 
     def move(self):
         self.circle1.move(self.x,self.y)
@@ -296,7 +334,15 @@ class Miniscan(Light_type):
         self.top_of_indicator = self.create_shape(self.x,self.y,25,5,border=True)
         self.bottom_of_indicator = self.create_shape(self.x,self.y,5,15,border=True)
         self.indicator = self.create_shape(self.x,self.y,10,10)
-        return [self.box,self.top_of_indicator,self.bottom_of_indicator,self.indicator]
+        self.select_shape = self.create_select_shape()
+        return [self.box,self.top_of_indicator,self.bottom_of_indicator,self.indicator,self.select_shape]
+
+    def create_select_shape(self):
+        select_shape = QLabel(self.light_display_window)
+        select_shape.move(self.x-5,self.y-5)
+        select_shape.setStyleSheet("border: 1px solid orange; background-color:transparent")
+        select_shape.setFixedSize(80,40)
+        return select_shape
 
     def move(self):
         self.box.move(self.x,self.y)
@@ -349,7 +395,15 @@ class LED_bar_24_channel(Light_type):
         self.border = self.create_shape(self.x,self.y,22,162)
         for i in range(1,9,1):
             setattr(self,f"box{i}",self.create_shape(self.x,self.y,20,20))
-        return [self.box1,self.box2,self.box3,self.box4,self.box5,self.box6,self.box7,self.box8,self.border]
+        self.select_shape = self.create_select_shape()
+        return [self.box1,self.box2,self.box3,self.box4,self.box5,self.box6,self.box7,self.box8,self.border,self.select_shape]
+
+    def create_select_shape(self):
+        select_shape = QLabel(self.light_display_window)
+        select_shape.move(self.x-5,self.y-5)
+        select_shape.setStyleSheet("border: 1px solid orange; background-color:transparent")
+        select_shape.setFixedSize(32,172)
+        return select_shape
 
     def move(self):
         for i in range(8):
