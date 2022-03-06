@@ -29,6 +29,10 @@ class Light_display_window(QMainWindow,uic.loadUiType(os.path.join("windows/ui",
         self.select_lights_action.triggered.connect(self.select_lights_pressed)
         self.select_all_lights_action.triggered.connect(self.select_all_lights_pressed)
         self.select_light_type_action.triggered.connect(self.select_light_type_pressed)
+        self.effects_action.triggered.connect(self.effects_pressed)
+
+    def effects_pressed(self):
+        self.light_display.run_effects_window()
 
     def select_all_lights_pressed(self):
         for fixture in self.light_display.get_fixtures():
@@ -104,11 +108,3 @@ class Light_display_window(QMainWindow,uic.loadUiType(os.path.join("windows/ui",
     def mode_selection_pressed(self):
         self.light_display.run_mode_selection_window()
         self.close()
-
-
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    win = Light_display_window()
-    win.show()
-    sys.exit(app.exec_())

@@ -37,4 +37,8 @@ Check if slider pannel window needs the select buttons since not used? Same with
 
 Potentially change saving rig names since rigs can be of the same name if they are within different accounts.
 
-Make sure all sections are tested to the test plan 
+Make sure all sections are tested to the test plan
+
+I haven't worried about deselecting lights when sequences are running yet.
+
+Error when deleting the rig fixture faders remain selected.

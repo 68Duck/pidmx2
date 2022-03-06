@@ -23,6 +23,7 @@ from windows.fixture_faders_window import Fixture_faders_window
 from windows.open_rig_window import Open_rig_window
 from windows.save_rig_window import Save_rig_window
 from windows.select_light_type_window import Select_light_type_window
+from windows.effects_window import Effects_window
 
 
 class Light_display(QWidget):
@@ -44,6 +45,7 @@ class Light_display(QWidget):
         self.lights_info = [Generic_dimmer(None,None,None,None,None,None),RGBW_light(None,None,None,None,None,None),RGB_light(None,None,None,None,None,None),Miniscan(None,None,None,None,None,None),LED_bar_24_channel(None,None,None,None,None,None)]
         self.copy_lights = []
         self.fixture_faders_window = Fixture_faders_window(self)
+        self.effects_counter = 0
 
 
     def update_intensities(self,intensities):
@@ -282,10 +284,18 @@ class Light_display(QWidget):
         self.run_light_display_window()
 
     def send_dmx(self):
+        self.tick_effects()
         if self.sending_dmx:
             self.dmx_controller.send()
         if self.running_raspberry_pi_dmx:
             pass  #finish me
+
+    def tick_effects(self):
+        self.effects_counter += 1
+        for fixture in self.fixtures:
+            if fixture is not None:
+                fixture.run_effects(self.effects_counter)
+
 
     def set_dmx(self,channel_number,channel_value):
         if self.sending_dmx:
@@ -342,6 +352,10 @@ class Light_display(QWidget):
         self.select_light_type_window = Select_light_type_window(self)
         self.select_light_type_window.show()
 
+    def run_effects_window(self):
+        self.effects_window = Effects_window(self)
+        self.effects_window.show()
+
     def select_light_type(self,light_type):
         for fixture in self.fixtures:
             if fixture is not None:
@@ -373,6 +387,7 @@ class Light_display(QWidget):
 
 
     def no_DMX(self):
+        self.timer.start(0)
         self.run_light_display_window()
 
     def test_port(self,port):

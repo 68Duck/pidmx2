@@ -15,6 +15,9 @@ class Light_type(object):
         self.copy = copy
         self.intensity = 0
         self.selected = False
+        self.effects = {"Rainbow":0,"Chaser":0}
+        self.rainbow_colour = [255,0,0]
+        self.chase = None
 
     def set_channel(self,channel_number,channel_value):
         if channel_number > len(self.channels):
@@ -51,6 +54,12 @@ class Light_type(object):
 
     def is_copy(self):
         return self.copy is True
+
+    def set_effects(self,effects):
+        self.effects = effects
+
+    def get_effects(self):
+        return self.effects
 
     def get_light_type(self):
         return self.light_type
@@ -92,11 +101,71 @@ class Light_type(object):
         if self.selected:
             self.select_shape.show()
         else:
+            self.effects = {"Rainbow":0,"Chaser":0}
             self.select_shape.hide()
         if update_faders:
             self.light_display_window.light_display.update_fixture_faders_selected_buttons()
 
+    def set_colour(self,r,g,b):
+        pass
 
+
+    def run_effects(self,effects_counter):
+        if self.effects["Rainbow"] > 0:
+            if effects_counter % (256-self.effects["Rainbow"]) == 0:
+                self.next_rainbow()
+        if self.effects["Chaser"] > 0:
+            if effects_counter % ((256-self.effects["Chaser"])*100) == 0:
+                self.next_chase()
+
+    def set_chase(self,chase):
+        self.chase = chase
+
+    def next_chase(self):
+        if self.chase is not None:
+            self.chase = self.chase[-1:]+self.chase[:-1]
+            if self.chase[0]:
+                self.intensity = 255
+                self.update_channels_from_intensity()
+                self.update_display()
+            else:
+                self.intensity = 0
+                self.update_channels_from_intensity()
+                self.update_display()
+
+    def next_rainbow(self):
+        if self.rainbow_colour[0] != self.rainbow_colour[1] and self.rainbow_colour[1] != self.rainbow_colour[2] and self.rainbow_colour[0] != self.rainbow_colour[1]:
+            if max(self.rainbow_colour) == self.rainbow_colour[0]:
+                if self.rainbow_colour[2] > 0:
+                    self.rainbow_colour[2] -= 1
+                else:
+                    self.rainbow_colour[1] += 1
+            elif max(self.rainbow_colour) == self.rainbow_colour[1]:
+                if self.rainbow_colour[0] > 0:
+                    self.rainbow_colour[0] -= 1
+                else:
+                    self.rainbow_colour[2] += 1
+            elif max(self.rainbow_colour) == self.rainbow_colour[2]:
+                if self.rainbow_colour[1] > 0:
+                    self.rainbow_colour[1] -= 1
+                else:
+                    self.rainbow_colour[0] += 1
+        else:
+            if self.rainbow_colour[0] == 255:
+                if self.rainbow_colour[2] == 255:
+                    self.rainbow_colour[2] -= 1
+                elif self.rainbow_colour[1] == 255:
+                    self.rainbow_colour[0] -= 1
+                else:
+                    self.rainbow_colour[1] += 1
+            else:
+                if self.rainbow_colour[2] == 0:
+                    self.rainbow_colour[2] += 1
+                elif self.rainbow_colour[1] == 255:
+                    self.rainbow_colour[1] -= 1
+                else:
+                    self.rainbow_colour[0] += 1
+        self.set_colour(self.rainbow_colour[0],self.rainbow_colour[1],self.rainbow_colour[2])
 
 
 class Generic_dimmer(Light_type):
@@ -236,6 +305,11 @@ class RGBW_light(Light_type):
         self.channels[2][1] = b
         self.channels[3][1] = self.intensity if max(red,green,blue) == 0 else w
 
+    def set_colour(self,r,g,b):
+        self.colour = [r,g,b,0]
+        self.update_channels_from_intensity()
+        self.update_display()
+
 
 class RGB_light(Light_type):
     def __init__(self,x,y,channel_number,fixture_number,light_display_window,copy):
@@ -317,6 +391,11 @@ class RGB_light(Light_type):
         self.channels[1][1] = r
         self.channels[2][1] = g
         self.channels[3][1] = b
+
+    def set_colour(self,r,g,b):
+        self.colour = [r,g,b]
+        self.update_channels_from_intensity()
+        self.update_display()
 
 class Miniscan(Light_type):
     def __init__(self,x,y,channel_number,fixture_number,light_display_window,copy):
@@ -436,3 +515,8 @@ class LED_bar_24_channel(Light_type):
             if c > 0:
                 c = maths.floor(c/max(self.colour)*self.intensity)
                 self.channels[i][1] = c
+
+    def set_colour(self,r,g,b):
+        self.colour = [r,g,b]*8
+        self.update_channels_from_intensity()
+        self.update_display()
