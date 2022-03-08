@@ -71,7 +71,7 @@ color: white;
     <string>Cancel</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="ok_button">
+  <widget class="QPushButton" name="save_button">
    <property name="geometry">
     <rect>
      <x>280</x>
@@ -94,10 +94,10 @@ color: white;
 }</string>
    </property>
    <property name="text">
-    <string>Ok</string>
+    <string>Save</string>
    </property>
   </widget>
-  <widget class="QLineEdit" name="username_input">
+  <widget class="QLineEdit" name="save_name_input">
    <property name="geometry">
     <rect>
      <x>170</x>

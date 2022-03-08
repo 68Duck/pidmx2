@@ -26,6 +26,9 @@ class Save_rig_window(Save_window):
     def save_pressed(self):
         account_id = self.light_display.get_account_id()
         save_name = self.save_name_input.text()
+        if save_name == "":
+            self.error_window = Error_window("Please enter a name for the rig")
+            return
         results = self.database_manager.query_db("SELECT r.rig_name FROM Rigs r JOIN Rigs_in_account a ON a.rig_id = r.rig_id WHERE a.account_id = ? AND r.rig_name = ?",(account_id,save_name))
         if len(results) > 0:
             self.error_window = Error_window("There is already a rig with that name")

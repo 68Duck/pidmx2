@@ -30,6 +30,18 @@ class Light_display_window(QMainWindow,uic.loadUiType(os.path.join("windows/ui",
         self.select_all_lights_action.triggered.connect(self.select_all_lights_pressed)
         self.select_light_type_action.triggered.connect(self.select_light_type_pressed)
         self.effects_action.triggered.connect(self.effects_pressed)
+        self.open_playback_action.triggered.connect(self.open_playback_pressed)
+        self.record_playback_action.triggered.connect(self.record_playback_pressed)
+        self.stage_creator_action.triggered.connect(self.stage_creator_pressed)
+
+    def stage_creator_pressed(self):
+        self.light_display.run_stage_creator_window()
+
+    def record_playback_pressed(self):
+        self.light_display.run_record_playback_window()
+
+    def open_playback_pressed(self):
+        self.light_display.run_open_playback_window()
 
     def effects_pressed(self):
         self.light_display.run_effects_window()

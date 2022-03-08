@@ -41,7 +41,7 @@ class Open_rig_window(Open_window):
                 fixtures = []
                 for light_id_dict in light_ids:
                     fixtures.append(self.database_manager.query_db("SELECT light_type,xpos,ypos,start_channel,fixture_number FROM Lights WHERE light_id=?",(light_id_dict["light_id"],))[0])
-                self.light_display.open_rig(fixtures)
+                self.light_display.open_rig(fixtures,rig_id)
                 self.close()
 
     def delete_pressed(self):

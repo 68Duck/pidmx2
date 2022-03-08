@@ -24,6 +24,9 @@ from windows.open_rig_window import Open_rig_window
 from windows.save_rig_window import Save_rig_window
 from windows.select_light_type_window import Select_light_type_window
 from windows.effects_window import Effects_window
+from windows.open_playback_window import Open_playback_window
+from windows.record_playback_window import Record_playback_window
+from windows.stage_creator_window import Stage_creator_window
 
 
 class Light_display(QWidget):
@@ -46,6 +49,7 @@ class Light_display(QWidget):
         self.copy_lights = []
         self.fixture_faders_window = Fixture_faders_window(self)
         self.effects_counter = 0
+        self.rig_id = None
 
 
     def update_intensities(self,intensities):
@@ -356,6 +360,18 @@ class Light_display(QWidget):
         self.effects_window = Effects_window(self)
         self.effects_window.show()
 
+    def run_open_playback_window(self):
+        self.open_playback_window = Open_playback_window(self,self.database_manager)
+        # self.open_playback_window.show() #not called since called within init which is required for error open window sequencing
+
+    def run_record_playback_window(self):
+        self.record_playback_window = Record_playback_window(self,self.database_manager)
+        # self.record_playback_window.show()  #not called since called within init which is required for error open window sequencing
+
+    def run_stage_creator_window(self):
+        self.stage_creator_window = Stage_creator_window(self,self.database_manager)
+        self.stage_creator_window.show()
+
     def select_light_type(self,light_type):
         for fixture in self.fixtures:
             if fixture is not None:
@@ -404,6 +420,9 @@ class Light_display(QWidget):
         except:
             return False
 
+    def get_rig_id(self):
+        return self.rig_id
+
 
     def logged_in(self,username):
         self.username = username
@@ -416,7 +435,8 @@ class Light_display(QWidget):
     def get_copy_lights(self):
         return self.copy_lights
 
-    def open_rig(self,fixtures):
+    def open_rig(self,fixtures,rig_id):
+        self.rig_id = rig_id
         for f in self.fixtures:
             if f is not None:
                 f.hide()
@@ -433,3 +453,25 @@ class Light_display(QWidget):
                         copy = True
             self.add_fixture(fixture["xpos"],fixture["ypos"],fixture["light_type"],fixture["fixture_number"],fixture["start_channel"],self.light_display_window,copy)
         self.fixture_faders_window.update_faders(self.fixtures)
+
+    def open_playback(self,channel_values,light_effects):
+        for fixture in self.fixtures: #Clear effects
+            if fixture is not None:
+                fixture.set_effects({"Rainbow":0,"Chaser":0})
+
+        for channel in channel_values:
+            for fixture in self.fixtures:
+                if fixture is not None:
+                    if fixture.get_channel_number() <= channel["channel_number"] and fixture.get_channel_number() + len(fixture.get_channels()) > channel["channel_number"]:
+                        channel_index = channel["channel_number"] - fixture.get_channel_number()  #should work since both one indexed
+                        fixture.set_channel(channel_index,channel["channel_value"],change_colour = True)
+        for effect in light_effects:
+            for fixture in self.fixtures:
+                if fixture is not None:
+                    light_id = self.database_manager.query_db("SELECT light_id FROM Lights WHERE light_type = ? AND start_channel = ? AND xpos = ? and ypos = ?",(fixture.get_light_type(),fixture.get_channel_number(),fixture.get_x(),fixture.get_y()))
+                    light_id = light_id[0]["light_id"]
+                    if light_id == effect["light_id"]:
+                        fixture.set_effect(effect["effect_name"],effect["effect_value"])
+
+        self.fixture_faders_window.update_faders(self.fixtures)
+        self.update_universe_from_fixtures()

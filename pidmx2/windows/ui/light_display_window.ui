@@ -81,7 +81,7 @@ QPushButton{background-color:white;border-radius:5px;}</string>
      <string>Playback</string>
     </property>
     <addaction name="record_playback_action"/>
-    <addaction name="save_playback_action"/>
+    <addaction name="open_playback_action"/>
    </widget>
    <widget class="QMenu" name="menuSequence">
     <property name="title">
@@ -176,9 +176,9 @@ QPushButton{background-color:white;border-radius:5px;}</string>
     <string>Record Playback</string>
    </property>
   </action>
-  <action name="save_playback_action">
+  <action name="open_playback_action">
    <property name="text">
-    <string>Save Playback</string>
+    <string>Open Playback</string>
    </property>
   </action>
   <action name="sequence_action">

@@ -19,12 +19,12 @@ class Light_type(object):
         self.rainbow_colour = [255,0,0]
         self.chase = None
 
-    def set_channel(self,channel_number,channel_value):
+    def set_channel(self,channel_number,channel_value,change_colour=False):
         if channel_number > len(self.channels):
             raise Exception("Channel out of range")
         else:
             self.channels[channel_number][1] = channel_value
-            self.update_display()
+            self.update_display(change_colour=change_colour)
 
     def create_shapes(self): #creates the shapes for each part of the abstraction of the light
         pass
@@ -57,6 +57,9 @@ class Light_type(object):
 
     def set_effects(self,effects):
         self.effects = effects
+
+    def set_effect(self,effect_name,effect_value):
+        self.effects[effect_name] = effect_value
 
     def get_effects(self):
         return self.effects

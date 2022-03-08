@@ -30,6 +30,7 @@ Possibly put in stakeholder input that the logon/create account is not obvious w
 Also for stakeholder input add extra faders since 24 is not that many
 
 Add confirm window to slider panel window removing light and deleting rigs for open_rig window
+USE PREMADE CONFIRM WINDOW USING QTWINDOW thing
 
 For testing logon window try to fix invalid characters test since no characters are invalid?
 
