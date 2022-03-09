@@ -370,6 +370,7 @@ class Light_display(QWidget):
 
     def run_stage_creator_window(self):
         self.stage_creator_window = Stage_creator_window(self,self.database_manager)
+        self.app.installEventFilter(self.stage_creator_window)
         self.stage_creator_window.show()
 
     def select_light_type(self,light_type):

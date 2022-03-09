@@ -18,7 +18,7 @@
 QAction{background-color:white;}</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QLabel" name="square_label_2">
+   <widget class="QLabel" name="rectangle_label_2">
     <property name="geometry">
      <rect>
       <x>20</x>
@@ -36,10 +36,10 @@ QAction{background-color:white;}</string>
      <string notr="true">QLabel{color:white}</string>
     </property>
     <property name="text">
-     <string>Now Press the location of the final coordinate of the square</string>
+     <string>Now press the location of the final coordinate of the rectangle</string>
     </property>
    </widget>
-   <widget class="QLabel" name="square_label_1">
+   <widget class="QLabel" name="rectangle_label_1">
     <property name="geometry">
      <rect>
       <x>20</x>
@@ -57,7 +57,7 @@ QAction{background-color:white;}</string>
      <string notr="true">QLabel{color:white}</string>
     </property>
     <property name="text">
-     <string>Press the location of one of the corners of the square</string>
+     <string>Press the location of one of the corners of the rectangle</string>
     </property>
    </widget>
   </widget>
@@ -74,26 +74,33 @@ QAction{background-color:white;}</string>
     <property name="title">
      <string>Add</string>
     </property>
-    <addaction name="actionAdd_Bar"/>
-    <addaction name="actionAdd_stage_square"/>
+    <widget class="QMenu" name="add_horizontal_menu">
+     <property name="title">
+      <string>Add Bar</string>
+     </property>
+     <addaction name="add_horizontal_action"/>
+     <addaction name="add_vertical_action"/>
+    </widget>
+    <addaction name="add_horizontal_menu"/>
+    <addaction name="add_stage_rectangle_action"/>
    </widget>
    <widget class="QMenu" name="menuOpen">
     <property name="title">
      <string>Open</string>
     </property>
-    <addaction name="actionOpen_Location"/>
+    <addaction name="open_location_action"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
      <string>Edit</string>
     </property>
-    <addaction name="actionChange_Bar_Size"/>
+    <addaction name="change_bar_size_action"/>
    </widget>
    <widget class="QMenu" name="menuNew">
     <property name="title">
-     <string>New</string>
+     <string>Save</string>
     </property>
-    <addaction name="actionNew_Stage_Layout"/>
+    <addaction name="save_stage_layout_action"/>
    </widget>
    <addaction name="menuAdd"/>
    <addaction name="menuOpen"/>
@@ -101,22 +108,17 @@ QAction{background-color:white;}</string>
    <addaction name="menuNew"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="actionAdd_Bar">
+  <action name="add_stage_rectangle_action">
    <property name="text">
-    <string>Add Bar</string>
+    <string>Add rectangle square</string>
    </property>
   </action>
-  <action name="actionAdd_stage_square">
-   <property name="text">
-    <string>Add stage square</string>
-   </property>
-  </action>
-  <action name="actionOpen_Location">
+  <action name="open_location_action">
    <property name="text">
     <string>Open Stage Layout</string>
    </property>
   </action>
-  <action name="actionChange_Bar_Size">
+  <action name="change_bar_size_action">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -127,9 +129,19 @@ QAction{background-color:white;}</string>
     <string>Change Bar Size</string>
    </property>
   </action>
-  <action name="actionNew_Stage_Layout">
+  <action name="save_stage_layout_action">
    <property name="text">
-    <string>New Stage Layout</string>
+    <string>Save stage layout</string>
+   </property>
+  </action>
+  <action name="add_horizontal_action">
+   <property name="text">
+    <string>Add Horizontal Bar</string>
+   </property>
+  </action>
+  <action name="add_vertical_action">
+   <property name="text">
+    <string>Add Vertical Bar</string>
    </property>
   </action>
  </widget>
