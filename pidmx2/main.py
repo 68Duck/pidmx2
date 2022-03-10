@@ -18,7 +18,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     light_display = Light_display(app) #Creates an instance of the light display class
     # light_display.run_logon_window() #Runs the logon window so it displays on the screen
-    # light_display.run_light_display_window() #Runs the logon window so it displays on the screen
+    light_display.run_light_display_window() #Runs the logon window so it displays on the screen
     # light_display.run_mode_selection_window() #Runs the logon window so it displays on the screen
-    light_display.run_stage_creator_window() #Runs the logon window so it displays on the screen
+    # light_display.run_stage_creator_window() #Runs the logon window so it displays on the screen
     sys.exit(app.exec_())

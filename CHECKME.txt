@@ -43,3 +43,5 @@ Make sure all sections are tested to the test plan
 I haven't worried about deselecting lights when sequences are running yet.
 
 Error when deleting the rig fixture faders remain selected.
+
+Potentially fix when rigs/playbacks/locations are deleted, it should check that it is deleting the rig/location/playback for that account rather then just deleting the first item with the same name since there can be duplicate names for different accounts

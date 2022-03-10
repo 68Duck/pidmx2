@@ -67,7 +67,7 @@ QAction{background-color:white;}</string>
      <x>0</x>
      <y>0</y>
      <width>1900</width>
-     <height>22</height>
+     <height>18</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuAdd">
@@ -110,7 +110,7 @@ QAction{background-color:white;}</string>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="add_stage_rectangle_action">
    <property name="text">
-    <string>Add rectangle square</string>
+    <string>Add rectangle </string>
    </property>
   </action>
   <action name="open_location_action">

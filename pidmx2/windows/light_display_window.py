@@ -6,6 +6,8 @@ import os
 import sys
 
 from windows.error_window import Error_window
+from windows.open_stage_window import Open_stage_window
+from bar_and_rectangle_classes import Rectangle,Bar
 
 class Light_display_window(QMainWindow,uic.loadUiType(os.path.join("windows/ui","light_display_window.ui"))[0]):
     def __init__(self,light_display,username,database_manager):
@@ -18,6 +20,8 @@ class Light_display_window(QMainWindow,uic.loadUiType(os.path.join("windows/ui",
         self.setMouseTracking(True)
         self.placing_light = False
         self.selecting_lights = False
+        self.bars = []
+        self.rectangles = []
         self.initUI()
 
     def initUI(self):
@@ -33,6 +37,47 @@ class Light_display_window(QMainWindow,uic.loadUiType(os.path.join("windows/ui",
         self.open_playback_action.triggered.connect(self.open_playback_pressed)
         self.record_playback_action.triggered.connect(self.record_playback_pressed)
         self.stage_creator_action.triggered.connect(self.stage_creator_pressed)
+        self.open_stage_action.triggered.connect(self.open_stage_pressed)
+
+    def open_stage_pressed(self):
+        self.open_stage_window = Open_stage_window(self.light_display,self.database_manager,self)
+        self.open_stage_window.show()
+
+    def open_location_by_location_naem(self,location_name):
+        location_id_dict = self.database_manager.query_db("SELECT location_id FROM Locations WHERE location_name = ?",(location_name,))
+        if len(location_id_dict) == 0:
+            raise Exception("No location with that name exists")
+        else:
+            location_id = location_id_dict[0]["location_id"]
+            bars_ids = self.database_manager.query_db("SELECT bars_id from Bars_in_locations WHERE location_id = ?",(location_id,))
+            rectangles_ids = self.database_manager.query_db("SELECT rectangles_id from Rectangles_in_locations WHERE location_id = ?",(location_id,))
+            bars = []
+            rectangles = []
+            for bars_id_dict in bars_ids:
+                bars.append(self.database_manager.query_db("SELECT width,height,xpos,ypos,is_horizontal,bar_name FROM Bars WHERE bars_id=?",(bars_id_dict["bars_id"],))[0])
+            for rectangles_id_dict in rectangles_ids:
+                rectangles.append(self.database_manager.query_db("SELECT width,height,xpos,ypos FROM Rectangles WHERE rectangles_id=?",(rectangles_id_dict["rectangles_id"],))[0])
+            self.open_location(bars,rectangles)
+
+
+    def open_location(self,bars,rectangles):
+        for bar in self.bars:
+            bar.hide()
+        for rectangle in self.rectangles:
+            rectangle.hide()
+        self.bars = []
+        self.rectangles = []
+        for bar in bars:
+            self.new_bar = Bar(bar["bar_name"],bar["xpos"],bar["ypos"],bar["width"],bar["height"],bar["is_horizontal"],self)
+            self.new_bar.show()
+            self.bars.append(self.new_bar)
+        for rectangle in rectangles:
+            self.new_rectangle = Rectangle(self,rectangle["xpos"],rectangle["ypos"],rectangle["width"],rectangle["height"])
+            self.rectangles.append(self.new_rectangle)
+
+
+
+
 
     def stage_creator_pressed(self):
         self.light_display.run_stage_creator_window()

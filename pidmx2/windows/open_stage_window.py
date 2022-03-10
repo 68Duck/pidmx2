@@ -5,15 +5,16 @@ from PyQt5.QtCore import*
 import os
 import sys
 from windows.open_window import Open_window
+from windows.error_window import Error_window
 
 
 class Open_stage_window(Open_window):
-    def __init__(self,light_display,database_manager,stage_creator_window):
+    def __init__(self,light_display,database_manager,display_window):
         super().__init__()
         self.setupUi(self)
         self.database_manager = database_manager
         self.light_display = light_display
-        self.stage_creator_window = stage_creator_window
+        self.display_window = display_window
         self.setWindowTitle("Open Stage Window")
         self.initUI()
 
@@ -47,7 +48,7 @@ class Open_stage_window(Open_window):
                 for rectangles_id_dict in rectangles_ids:
                     rectangles.append(self.database_manager.query_db("SELECT width,height,xpos,ypos FROM Rectangles WHERE rectangles_id=?",(rectangles_id_dict["rectangles_id"],))[0])
 
-                self.stage_creator_window.open_location(bars,rectangles)
+                self.display_window.open_location(bars,rectangles)
                 self.close()
 
     def delete_pressed(self):

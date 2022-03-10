@@ -7,6 +7,7 @@ import sys
 
 from windows.save_window import Save_window
 from windows.message_window import Message_window
+from windows.error_window import Error_window
 from dict_factory import dict_factory
 
 class Save_stage_window(Save_window):
