@@ -52,12 +52,15 @@ class Open_stage_window(Open_window):
                 self.close()
 
     def delete_pressed(self):
-        location_name = self.drop_down.currentText()
-        if location_name is None:
-            self.error_window = Error_window("No location was selected. Please try again")
-        else:
-            self.database_manager.query_db("DELETE FROM Locations WHERE location_name = ?",(location_name,))
-        self.close()
+        qm = QMessageBox
+        result = qm.question(self,'Delete Location?', "Are you sure you want to delete the location?", qm.Yes | qm.No)
+        if result == qm.Yes:
+            location_name = self.drop_down.currentText()
+            if location_name is None:
+                self.error_window = Error_window("No location was selected. Please try again")
+            else:
+                self.database_manager.query_db("DELETE FROM Locations WHERE location_name = ?",(location_name,))
+            self.close()
 
     def keyPressEvent(self,e):
         if e.key() == Qt.Key_Return:

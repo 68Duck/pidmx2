@@ -96,17 +96,20 @@ class Edit_sequence_window(QWidget,uic.loadUiType(os.path.join("windows/ui","edi
         self.close()
 
     def delete_pressed(self):
-        rig_id = self.light_display.get_rig_id()
-        for i,dict in enumerate(self.playbacks):
-            playback_name = dict["playback_name"]
-            if self.table.item(i,2).checkState():
-                self.database_manager.query_db("DELETE FROM Playbacks WHERE playback_name = ? AND rig_id = ?",(playback_name,rig_id))
+        qm = QMessageBox
+        result = qm.question(self,'Delete Playbacks?', "Are you sure you want to delete the playbacks?", qm.Yes | qm.No)
+        if result == qm.Yes:
+            rig_id = self.light_display.get_rig_id()
+            for i,dict in enumerate(self.playbacks):
+                playback_name = dict["playback_name"]
+                if self.table.item(i,2).checkState():
+                    self.database_manager.query_db("DELETE FROM Playbacks WHERE playback_name = ? AND rig_id = ?",(playback_name,rig_id))
 
-        sequence_id = self.sequence_window.get_sequence_id()
-        sequence_playbacks = self.database_manager.query_db("SELECT s.playback_id,s.time_delay FROM Sequence_playbacks s JOIN Playbacks p ON p.playback_id = s.playback_id WHERE s.sequence_id = ? ORDER BY p.playback_name ",(sequence_id,))
-        self.sequence_window.update_sequence_playbacks(sequence_playbacks)
-        self.message_window = Message_window("The sequence was updated")
-        self.close()
+            sequence_id = self.sequence_window.get_sequence_id()
+            sequence_playbacks = self.database_manager.query_db("SELECT s.playback_id,s.time_delay FROM Sequence_playbacks s JOIN Playbacks p ON p.playback_id = s.playback_id WHERE s.sequence_id = ? ORDER BY p.playback_name ",(sequence_id,))
+            self.sequence_window.update_sequence_playbacks(sequence_playbacks)
+            self.message_window = Message_window("The sequence was updated")
+            self.close()
 
 
 
@@ -125,7 +128,7 @@ class TableWidget(QTableWidget):  #taken from https://stackoverflow.com/question
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.setDragDropMode(QAbstractItemView.InternalMove)
 
-        self.setStyleSheet("background-color:white;")
+        self.setStyleSheet("background-color:white;color:black;")
 
     def dropEvent(self, event: QDropEvent):
         if not event.isAccepted() and event.source() == self:

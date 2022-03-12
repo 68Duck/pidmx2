@@ -5,6 +5,8 @@ from PyQt5.QtCore import*
 import os
 import sys
 
+from windows.confirm_window import Confirm_window
+
 class Slider_pannel_window(QWidget,uic.loadUiType(os.path.join("windows/ui","slider_pannel_window.ui"))[0]):
     def __init__(self,light,light_display):
         super().__init__()
@@ -42,10 +44,12 @@ class Slider_pannel_window(QWidget,uic.loadUiType(os.path.join("windows/ui","sli
         self.close()
 
     def remove_fixture_button_pressed(self):
-        #ADD CONFIRM WINDOW HERE
-        self.light.hide()
-        self.delete_fixture()
-        self.close()
+        qm = QMessageBox
+        result = qm.question(self,'Delete Fixture?', "Are you sure you want to delete the fixture?", qm.Yes | qm.No)
+        if result == qm.Yes:
+            self.light.hide()
+            self.delete_fixture()
+            self.close()
 
     def delete_fixture(self):
         self.light_display.delete_fixture(self.light)

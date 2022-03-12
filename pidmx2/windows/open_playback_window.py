@@ -53,12 +53,15 @@ class Open_playback_window(Open_window):
                 self.close()
 
     def delete_pressed(self):
-        playback_name = self.drop_down.currentText()
-        if playback_name is None:
-            self.error_window = Error_window("No rig was selected. Please try again")
-        else:
-            self.database_manager.query_db("DELETE FROM Playbacks WHERE playback_name = ?",(playback_name,))
-        self.close()
+        qm = QMessageBox
+        result = qm.question(self,'Delete Playback?', "Are you sure you want to delete the playback?", qm.Yes | qm.No)
+        if result == qm.Yes:
+            playback_name = self.drop_down.currentText()
+            if playback_name is None:
+                self.error_window = Error_window("No rig was selected. Please try again")
+            else:
+                self.database_manager.query_db("DELETE FROM Playbacks WHERE playback_name = ?",(playback_name,))
+            self.close()
 
     def keyPressEvent(self,e):
         if e.key() == Qt.Key_Return:

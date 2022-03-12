@@ -21,12 +21,3 @@ class Message_window(QWidget,uic.loadUiType(os.path.join("windows/ui","message_w
     def keyPressEvent(self,e):
         if e.key() == Qt.Key_Return:
             self.close()
-
-
-
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    win = Message_window("This is placeholder text for the message window. In the actual window the message displayed here will be relevent to the senario in which the message window was opened")
-    win.show()
-    sys.exit(app.exec_())

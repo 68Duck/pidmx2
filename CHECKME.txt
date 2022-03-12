@@ -7,8 +7,6 @@ In write up mention error of 0 indexing since channels are from 1 to 512 but arr
 
 Potentially mention robust design where values can only be changed through functions which have validation.
 
-Add confirm window to close edit sequence window if unsaved changes made. Same for sequence window itself.
-
 Have effects as a property of the light. In send effects to lights (a function called in the main run loop), update the values of the channels depending on the current effect values.
 These effect values should be stored in a dictionary so other effects can be added later so the dictionary will contain an effect value and the name of the effect e.g. {"chaser":50,"rainbow":0}
 

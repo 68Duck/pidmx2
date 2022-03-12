@@ -117,21 +117,21 @@ class Light_display_window(QMainWindow,uic.loadUiType(os.path.join("windows/ui",
         self.open_stage_window = Open_stage_window(self.light_display,self.database_manager,self)
         self.open_stage_window.show()
 
-    def open_location_by_location_naem(self,location_name): #Spelt wrong? Where is this called from?
-        location_id_dict = self.database_manager.query_db("SELECT location_id FROM Locations WHERE location_name = ?",(location_name,))
-        if len(location_id_dict) == 0:
-            raise Exception("No location with that name exists")
-        else:
-            location_id = location_id_dict[0]["location_id"]
-            bars_ids = self.database_manager.query_db("SELECT bars_id from Bars_in_locations WHERE location_id = ?",(location_id,))
-            rectangles_ids = self.database_manager.query_db("SELECT rectangles_id from Rectangles_in_locations WHERE location_id = ?",(location_id,))
-            bars = []
-            rectangles = []
-            for bars_id_dict in bars_ids:
-                bars.append(self.database_manager.query_db("SELECT width,height,xpos,ypos,is_horizontal,bar_name FROM Bars WHERE bars_id=?",(bars_id_dict["bars_id"],))[0])
-            for rectangles_id_dict in rectangles_ids:
-                rectangles.append(self.database_manager.query_db("SELECT width,height,xpos,ypos FROM Rectangles WHERE rectangles_id=?",(rectangles_id_dict["rectangles_id"],))[0])
-            self.open_location(bars,rectangles)
+    # def open_location_by_location_naem(self,location_name): #Spelt wrong? Where is this called from?
+    #     location_id_dict = self.database_manager.query_db("SELECT location_id FROM Locations WHERE location_name = ?",(location_name,))
+    #     if len(location_id_dict) == 0:
+    #         raise Exception("No location with that name exists")
+    #     else:
+    #         location_id = location_id_dict[0]["location_id"]
+    #         bars_ids = self.database_manager.query_db("SELECT bars_id from Bars_in_locations WHERE location_id = ?",(location_id,))
+    #         rectangles_ids = self.database_manager.query_db("SELECT rectangles_id from Rectangles_in_locations WHERE location_id = ?",(location_id,))
+    #         bars = []
+    #         rectangles = []
+    #         for bars_id_dict in bars_ids:
+    #             bars.append(self.database_manager.query_db("SELECT width,height,xpos,ypos,is_horizontal,bar_name FROM Bars WHERE bars_id=?",(bars_id_dict["bars_id"],))[0])
+    #         for rectangles_id_dict in rectangles_ids:
+    #             rectangles.append(self.database_manager.query_db("SELECT width,height,xpos,ypos FROM Rectangles WHERE rectangles_id=?",(rectangles_id_dict["rectangles_id"],))[0])
+    #         self.open_location(bars,rectangles)
 
 
     def open_location(self,bars,rectangles):

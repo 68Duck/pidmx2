@@ -44,13 +44,16 @@ class Open_sequence_window(Open_window):
                 self.close()
 
     def delete_pressed(self):
-        rig_id = self.light_display.get_rig_id()
-        sequence_name = self.drop_down.currentText()
-        if sequence_name is None:
-            self.error_window = Error_window("No rig was selected. Please try again")
-        else:
-            self.database_manager.query_db("DELETE FROM sequences WHERE sequence_name = ? AND rig_id = ?",(sequence_name,rig_id))
-        self.close()
+        qm = QMessageBox
+        result = qm.question(self,'Delete Sequence?', "Are you sure you want to delete the sequence?", qm.Yes | qm.No)
+        if result == qm.Yes:
+            rig_id = self.light_display.get_rig_id()
+            sequence_name = self.drop_down.currentText()
+            if sequence_name is None:
+                self.error_window = Error_window("No rig was selected. Please try again")
+            else:
+                self.database_manager.query_db("DELETE FROM sequences WHERE sequence_name = ? AND rig_id = ?",(sequence_name,rig_id))
+            self.close()
 
     def keyPressEvent(self,e):
         if e.key() == Qt.Key_Return:

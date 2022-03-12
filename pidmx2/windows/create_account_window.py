@@ -69,11 +69,3 @@ class Create_account_window(QWidget,uic.loadUiType(os.path.join("windows/ui","cr
 
         self.database_manager.query_db("INSERT INTO Accounts(username,hashed_password) VALUES(?,?)",(username,hashed_password)) #insert the username and hashed_password into the Accounts table
         message_window = QtWidgets.QMessageBox.question(self,"Message",f"An account with name {username} has been created.",QtWidgets.QMessageBox.Ok) #displays the message
-
-
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    win = Create_account_window(Database_manager())
-    win.show()
-    sys.exit(app.exec_())

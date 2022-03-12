@@ -51,10 +51,3 @@ class Ip_address_selection_window(QWidget,uic.loadUiType(os.path.join("windows/u
     def keyPressEvent(self,e): #on the enter key being pressed, call the submit_pressed function
         if e.key() == Qt.Key_Return:
             self.submit_pressed()
-
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    win = Ip_address_selection_window()
-    win.show()
-    sys.exit(app.exec_())

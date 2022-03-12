@@ -14,7 +14,7 @@
    <string>Form</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">QWidget{background-color:#292C34}</string>
+   <string notr="true">QWidget{background-color:#292C34;color:white;}</string>
   </property>
   <widget class="QPushButton" name="delete_button">
    <property name="geometry">

@@ -45,12 +45,15 @@ class Open_rig_window(Open_window):
                 self.close()
 
     def delete_pressed(self):
-        rig_name = self.drop_down.currentText()
-        if rig_name is None:
-            self.error_window = Error_window("No rig was selected. Please try again")
-        else:
-            self.database_manager.query_db("DELETE FROM Rigs WHERE rig_name = ?",(rig_name,))
-        self.close()
+        qm = QMessageBox
+        result = qm.question(self,'Delete Rig?', "Are you sure you want to delete the rig?", qm.Yes | qm.No)
+        if result == qm.Yes:
+            rig_name = self.drop_down.currentText()
+            if rig_name is None:
+                self.error_window = Error_window("No rig was selected. Please try again")
+            else:
+                self.database_manager.query_db("DELETE FROM Rigs WHERE rig_name = ?",(rig_name,))
+            self.close()
 
     def keyPressEvent(self,e):
         if e.key() == Qt.Key_Return:
