@@ -5,8 +5,8 @@ from PyQt5.QtCore import*
 import math as maths
 
 class Light_type(object):
-    def __init__(self,x,y,channel_number,fixture_number,light_display_window,copy):
-        self.light_display_window = light_display_window
+    def __init__(self,x,y,channel_number,fixture_number,display_window,copy,parent_fixture = None):
+        self.display_window = display_window
         self.channel_number = channel_number
         self.fixture_number = fixture_number
         # self.channels = [["channel_name","channel_value"]]
@@ -18,6 +18,13 @@ class Light_type(object):
         self.effects = {"Rainbow":0,"Chaser":0}
         self.rainbow_colour = [255,0,0]
         self.chase = None
+        self.parent_fixture = parent_fixture
+
+    def update_parent(self):
+        self.parent_fixture.set_channels(self.channels)
+        self.parent_fixture.set_intensity(self.intensity)
+        self.parent_fixture.update_channels_from_intensity()
+        self.parent_fixture.update_display()
 
     def set_channel(self,channel_number,channel_value,change_colour=False):
         if channel_number > len(self.channels):
@@ -107,10 +114,13 @@ class Light_type(object):
             self.effects = {"Rainbow":0,"Chaser":0}
             self.select_shape.hide()
         if update_faders:
-            self.light_display_window.light_display.update_fixture_faders_selected_buttons()
+            self.display_window.light_display.update_fixture_faders_selected_buttons()
 
     def set_colour(self,r,g,b):
         pass
+
+    def get_colour(self):
+        return None
 
 
     def run_effects(self,effects_counter):
@@ -170,14 +180,17 @@ class Light_type(object):
                     self.rainbow_colour[0] += 1
         self.set_colour(self.rainbow_colour[0],self.rainbow_colour[1],self.rainbow_colour[2])
 
+    def get_parent_fixture(self):
+        return self.parent_fixture
+
 
 class Generic_dimmer(Light_type):
-    def __init__(self,x,y,channel_number,fixture_number,light_display_window,copy):
-        super().__init__(x,y,channel_number,fixture_number,light_display_window,copy)
+    def __init__(self,x,y,channel_number,fixture_number,display_window,copy,parent_fixture=None):
+        super().__init__(x,y,channel_number,fixture_number,display_window,copy,parent_fixture)
         self.channels = [["Intensity",0]]
         self.light_type = "Generic_dimmer"
         self.clickable_region = [0,35,0,75] #in the order left right top bottom from x,y
-        if self.light_display_window is not None:
+        if self.display_window is not None:
             self.shapes = self.create_shapes()
             self.update_display()
 
@@ -189,7 +202,7 @@ class Generic_dimmer(Light_type):
         return [self.border,self.box,self.indicator,self.select_shape]
 
     def create_select_shape(self):
-        select_shape = QLabel(self.light_display_window)
+        select_shape = QLabel(self.display_window)
         select_shape.move(self.x-5,self.y-5)
         select_shape.setStyleSheet("border: 1px solid orange; background-color:transparent")
         select_shape.setFixedSize(45,85)
@@ -201,7 +214,7 @@ class Generic_dimmer(Light_type):
         self.indicator.move(self.x+5,self.y)
 
     def create_shape(self,x,y,width,height,border=False):
-        self.shape = QLabel(self.light_display_window)
+        self.shape = QLabel(self.display_window)
         if border:
             self.shape.setStyleSheet(f'background-color: white;')
         else:
@@ -211,8 +224,8 @@ class Generic_dimmer(Light_type):
         self.shape.show()
         return self.shape
 
-    def generate_new_light(self,x,y,channel_number,fixture_number,light_display_window,copy):
-        return Generic_dimmer(x,y,channel_number,fixture_number,light_display_window,copy)
+    def generate_new_light(self,x,y,channel_number,fixture_number,display_window,copy,parent_fixture=None):
+        return Generic_dimmer(x,y,channel_number,fixture_number,display_window,copy,parent_fixture)
 
     def update_display(self,change_colour=False):
         self.intensity = self.channels[0][1]
@@ -222,13 +235,13 @@ class Generic_dimmer(Light_type):
         self.channels[0][1] = self.intensity
 
 class RGBW_light(Light_type):
-    def __init__(self,x,y,channel_number,fixture_number,light_display_window,copy):
-        super().__init__(x,y,channel_number,fixture_number,light_display_window,copy)
+    def __init__(self,x,y,channel_number,fixture_number,display_window,copy,parent_fixture=None):
+        super().__init__(x,y,channel_number,fixture_number,display_window,copy,parent_fixture)
         self.channels = [["Red",0],["Green",0],["Blue",0],["White",0]]
         self.light_type = "RGBW_light"
         self.clickable_region = [40,40,40,40] #in the order left right top bottom from x,y
         self.colour = [0,0,0,0]
-        if self.light_display_window is not None:
+        if self.display_window is not None:
             self.shapes = self.create_shapes()
             self.move()
             self.update_display()
@@ -241,7 +254,7 @@ class RGBW_light(Light_type):
         return [self.border,self.circle1,self.circle2,self.circle3,self.circle4,self.circle5,self.select_shape]
 
     def create_select_shape(self):
-        select_shape = QLabel(self.light_display_window)
+        select_shape = QLabel(self.display_window)
         select_shape.move(self.x-40,self.y-40)
         select_shape.setStyleSheet("border: 1px solid orange; background-color:transparent")
         select_shape.setFixedSize(90,90)
@@ -257,7 +270,7 @@ class RGBW_light(Light_type):
         self.border.move(self.x-35,self.y-35)
 
     def create_shape(self,x,y,width,height,borderWidth,circle = False):
-        self.shape = QLabel(self.light_display_window)
+        self.shape = QLabel(self.display_window)
         if circle:
             self.shape.borderWidth = borderWidth
             self.shape.setStyleSheet(f'background-color: white; border-radius: {borderWidth}px;border: 3px solid white;')
@@ -268,8 +281,8 @@ class RGBW_light(Light_type):
         self.shape.show()
         return self.shape
 
-    def generate_new_light(self,x,y,channel_number,fixture_number,light_display_window,copy):
-        return RGBW_light(x,y,channel_number,fixture_number,light_display_window,copy)
+    def generate_new_light(self,x,y,channel_number,fixture_number,display_window,copy,parent_fixture=None):
+        return RGBW_light(x,y,channel_number,fixture_number,display_window,copy,parent_fixture)
 
     def update_display(self,change_colour=False):
         red = self.channels[0][1]
@@ -313,15 +326,18 @@ class RGBW_light(Light_type):
         self.update_channels_from_intensity()
         self.update_display()
 
+    def get_colour(self):
+        return [self.colour[0],self.colour[1],self.colour[2]]
+
 
 class RGB_light(Light_type):
-    def __init__(self,x,y,channel_number,fixture_number,light_display_window,copy):
-        super().__init__(x,y,channel_number,fixture_number,light_display_window,copy)
+    def __init__(self,x,y,channel_number,fixture_number,display_window,copy,parent_fixture=None):
+        super().__init__(x,y,channel_number,fixture_number,display_window,copy,parent_fixture)
         self.channels = [["Intensity",0],["Red",0],["Green",0],["Blue",0]]
         self.light_type = "RGB_light"
         self.clickable_region = [40,40,40,40] #in the order left right top bottom from x,y
         self.colour = [0,0,0]
-        if self.light_display_window is not None:
+        if self.display_window is not None:
             self.shapes = self.create_shapes()
             self.move()
             self.update_display()
@@ -334,7 +350,7 @@ class RGB_light(Light_type):
         return [self.border,self.circle1,self.circle2,self.circle3,self.circle4,self.circle5,self.select_shape]
 
     def create_select_shape(self):
-        select_shape = QLabel(self.light_display_window)
+        select_shape = QLabel(self.display_window)
         select_shape.move(self.x-40,self.y-40)
         select_shape.setStyleSheet("border: 1px solid orange; background-color:transparent")
         select_shape.setFixedSize(90,90)
@@ -349,7 +365,7 @@ class RGB_light(Light_type):
         self.border.move(self.x-35,self.y-35)
 
     def create_shape(self,x,y,width,height,borderWidth,circle = False):
-        self.shape = QLabel(self.light_display_window)
+        self.shape = QLabel(self.display_window)
         if circle:
             self.shape.borderWidth = borderWidth
             self.shape.setStyleSheet(f'background-color: white; border-radius: {borderWidth}px;border: 3px solid white;')
@@ -360,8 +376,8 @@ class RGB_light(Light_type):
         self.shape.show()
         return self.shape
 
-    def generate_new_light(self,x,y,channel_number,fixture_number,light_display_window,copy):
-        return RGB_light(x,y,channel_number,fixture_number,light_display_window,copy)
+    def generate_new_light(self,x,y,channel_number,fixture_number,display_window,copy,parent_fixture=None):
+        return RGB_light(x,y,channel_number,fixture_number,display_window,copy,parent_fixture)
 
     def update_display(self,change_colour=False):
         self.intensity = self.channels[0][1]
@@ -400,13 +416,16 @@ class RGB_light(Light_type):
         self.update_channels_from_intensity()
         self.update_display()
 
+    def get_colour(self):
+        return self.colour
+
 class Miniscan(Light_type):
-    def __init__(self,x,y,channel_number,fixture_number,light_display_window,copy):
-        super().__init__(x,y,channel_number,fixture_number,light_display_window,copy)
+    def __init__(self,x,y,channel_number,fixture_number,display_window,copy,parent_fixture=None):
+        super().__init__(x,y,channel_number,fixture_number,display_window,copy,parent_fixture)
         self.channels = [["Colour",0],["Gobo_roatation",0],["Gobo",0],["Intensity",0],["Pan",0],["Tilt",0],["Effects",0]]
         self.light_type = "Miniscan"
         self.clickable_region = [0,70,0,30] #in the order left right top bottom from x,y
-        if self.light_display_window is not None:
+        if self.display_window is not None:
             self.shapes = self.create_shapes()
             self.move()
             self.update_display()
@@ -420,7 +439,7 @@ class Miniscan(Light_type):
         return [self.box,self.top_of_indicator,self.bottom_of_indicator,self.indicator,self.select_shape]
 
     def create_select_shape(self):
-        select_shape = QLabel(self.light_display_window)
+        select_shape = QLabel(self.display_window)
         select_shape.move(self.x-5,self.y-5)
         select_shape.setStyleSheet("border: 1px solid orange; background-color:transparent")
         select_shape.setFixedSize(80,40)
@@ -433,7 +452,7 @@ class Miniscan(Light_type):
         self.indicator.move(self.x+50,self.y+5)
 
     def create_shape(self,x,y,width,height,border = False):
-        self.shape = QLabel(self.light_display_window)
+        self.shape = QLabel(self.display_window)
         if border:
             self.shape.setStyleSheet(f'background-color: white;')
         else:
@@ -443,8 +462,8 @@ class Miniscan(Light_type):
         self.shape.show()
         return self.shape
 
-    def generate_new_light(self,x,y,channel_number,fixture_number,light_display_window,copy):
-        return Miniscan(x,y,channel_number,fixture_number,light_display_window,copy)
+    def generate_new_light(self,x,y,channel_number,fixture_number,display_window,copy,parent_fixture=None):
+        return Miniscan(x,y,channel_number,fixture_number,display_window,copy,parent_fixture)
 
     def update_display(self,change_colour=False):
         self.intensity = self.channels[3][1]
@@ -454,13 +473,13 @@ class Miniscan(Light_type):
         self.channels[3][1] = self.intensity
 
 class LED_bar_24_channel(Light_type):
-    def __init__(self,x,y,channel_number,fixture_number,light_display_window,copy):
-        super().__init__(x,y,channel_number,fixture_number,light_display_window,copy)
+    def __init__(self,x,y,channel_number,fixture_number,display_window,copy,parent_fixture=None):
+        super().__init__(x,y,channel_number,fixture_number,display_window,copy,parent_fixture)
         self.channels = self.setup_channels()
         self.light_type = "LED_bar_24_channel"
         self.colour = [0]*24
         self.clickable_region = [0,20,0,175] #in the order left right top bottom from x,y
-        if self.light_display_window is not None:
+        if self.display_window is not None:
             self.shapes = self.create_shapes()
             self.move()
             self.update_display()
@@ -481,7 +500,7 @@ class LED_bar_24_channel(Light_type):
         return [self.box1,self.box2,self.box3,self.box4,self.box5,self.box6,self.box7,self.box8,self.border,self.select_shape]
 
     def create_select_shape(self):
-        select_shape = QLabel(self.light_display_window)
+        select_shape = QLabel(self.display_window)
         select_shape.move(self.x-5,self.y-5)
         select_shape.setStyleSheet("border: 1px solid orange; background-color:transparent")
         select_shape.setFixedSize(32,172)
@@ -493,15 +512,15 @@ class LED_bar_24_channel(Light_type):
             box.move(self.x+1,self.y+20*i+1)
 
     def create_shape(self,x,y,width,height):
-        self.shape = QLabel(self.light_display_window)
+        self.shape = QLabel(self.display_window)
         self.shape.setStyleSheet(f'background-color: white;')
         self.shape.move(x,y)
         self.shape.setFixedSize(width,height)
         self.shape.show()
         return self.shape
 
-    def generate_new_light(self,x,y,channel_number,fixture_number,light_display_window,copy):
-        return LED_bar_24_channel(x,y,channel_number,fixture_number,light_display_window,copy)
+    def generate_new_light(self,x,y,channel_number,fixture_number,display_window,copy,parent_fixture=None):
+        return LED_bar_24_channel(x,y,channel_number,fixture_number,display_window,copy,parent_fixture)
 
     def update_display(self,change_colour=False):
         self.intensity = max([channel[1] for channel in self.channels])
@@ -523,3 +542,6 @@ class LED_bar_24_channel(Light_type):
         self.colour = [r,g,b]*8
         self.update_channels_from_intensity()
         self.update_display()
+
+    def get_colour(self):
+        return [self.colour[0],self.colour[1],self.colour[2]]

@@ -88,7 +88,7 @@ QPushButton{background-color:white;border-radius:5px;}</string>
      <string>Sequence</string>
     </property>
     <addaction name="sequence_action"/>
-    <addaction name="open_sequence_action"/>
+    <addaction name="run_sequence_action"/>
     <addaction name="stop_sequence_action"/>
    </widget>
    <widget class="QMenu" name="menuCreate_Light_Type">
@@ -186,9 +186,9 @@ QPushButton{background-color:white;border-radius:5px;}</string>
     <string>Sequence Window</string>
    </property>
   </action>
-  <action name="open_sequence_action">
+  <action name="run_sequence_action">
    <property name="text">
-    <string>Open Sequence</string>
+    <string>Run Sequence</string>
    </property>
   </action>
   <action name="stop_sequence_action">

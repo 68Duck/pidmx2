@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1900</width>
-    <height>1080</height>
+    <width>1904</width>
+    <height>1089</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -57,7 +57,7 @@ QMainWindow{color:white;background-color:black;}
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1900</width>
+     <width>1904</width>
      <height>22</height>
     </rect>
    </property>
@@ -66,29 +66,29 @@ QMainWindow{color:white;background-color:black;}
      <string>Add Light</string>
     </property>
     <addaction name="add_light_action"/>
-    <addaction name="actionAdd_all_lights"/>
+    <addaction name="add_all_lights_action"/>
    </widget>
    <widget class="QMenu" name="menuColour">
     <property name="title">
      <string>Colour</string>
     </property>
-    <addaction name="actionChoose_Colour"/>
-    <addaction name="actionReplace_Colour"/>
-    <addaction name="actionColour_Mode"/>
+    <addaction name="choose_colour_action"/>
+    <addaction name="replace_colour_action"/>
+    <addaction name="colour_mode_action"/>
    </widget>
    <widget class="QMenu" name="menuSequence">
     <property name="title">
      <string>Sequence</string>
     </property>
-    <addaction name="actionSave_Sequence"/>
-    <addaction name="actionOpen_Sequence"/>
-    <addaction name="actionEdit_Sequence"/>
+    <addaction name="save_sequence_action"/>
+    <addaction name="open_sequence_action"/>
+    <addaction name="edit_sequence_action"/>
    </widget>
    <widget class="QMenu" name="menuPlayback">
     <property name="title">
      <string>Playback</string>
     </property>
-    <addaction name="actionSave_playback"/>
+    <addaction name="record_playback_action"/>
    </widget>
    <addaction name="menuAdd_lights"/>
    <addaction name="menuColour"/>
@@ -101,44 +101,47 @@ QMainWindow{color:white;background-color:black;}
     <string>Add light</string>
    </property>
   </action>
-  <action name="actionAdd_all_lights">
+  <action name="add_all_lights_action">
    <property name="text">
     <string>Add all lights</string>
    </property>
   </action>
-  <action name="actionChoose_Colour">
+  <action name="choose_colour_action">
    <property name="text">
     <string>Choose Colour</string>
    </property>
   </action>
-  <action name="actionReplace_Colour">
+  <action name="replace_colour_action">
    <property name="text">
     <string>Replace Colour</string>
    </property>
   </action>
-  <action name="actionColour_Mode">
+  <action name="colour_mode_action">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Colour Mode</string>
    </property>
   </action>
-  <action name="actionSave_Sequence">
+  <action name="save_sequence_action">
    <property name="text">
     <string>Save Sequence</string>
    </property>
   </action>
-  <action name="actionOpen_Sequence">
+  <action name="open_sequence_action">
    <property name="text">
     <string>Open Sequence</string>
    </property>
   </action>
-  <action name="actionEdit_Sequence">
+  <action name="edit_sequence_action">
    <property name="text">
     <string>Edit Sequence</string>
    </property>
   </action>
-  <action name="actionSave_playback">
+  <action name="record_playback_action">
    <property name="text">
-    <string>Save playback</string>
+    <string>Record playback</string>
    </property>
   </action>
  </widget>

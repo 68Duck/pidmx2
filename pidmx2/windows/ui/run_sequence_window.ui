@@ -23,7 +23,7 @@ color:white;
    <property name="geometry">
     <rect>
      <x>50</x>
-     <y>120</y>
+     <y>130</y>
      <width>331</width>
      <height>51</height>
     </rect>
@@ -54,11 +54,11 @@ color:white;
     <bool>false</bool>
    </property>
   </widget>
-  <widget class="QCheckBox" name="look_check_box">
+  <widget class="QCheckBox" name="loop_check_box">
    <property name="geometry">
     <rect>
      <x>50</x>
-     <y>90</y>
+     <y>100</y>
      <width>64</width>
      <height>18</height>
     </rect>
@@ -78,7 +78,7 @@ color:white;
     <bool>false</bool>
    </property>
   </widget>
-  <widget class="QComboBox" name="sequence_dropdown">
+  <widget class="QComboBox" name="drop_down">
    <property name="geometry">
     <rect>
      <x>50</x>

@@ -27,6 +27,8 @@ from windows.effects_window import Effects_window
 from windows.open_playback_window import Open_playback_window
 from windows.record_playback_window import Record_playback_window
 from windows.stage_creator_window import Stage_creator_window
+from windows.sequence_window import Sequence_window
+from windows.run_sequence_window import Run_sequence_window
 
 
 class Light_display(QWidget):
@@ -50,6 +52,7 @@ class Light_display(QWidget):
         self.fixture_faders_window = Fixture_faders_window(self)
         self.effects_counter = 0
         self.rig_id = None
+        self.before_blackout_intensities = None
 
 
     def update_intensities(self,intensities):
@@ -373,6 +376,15 @@ class Light_display(QWidget):
         self.app.installEventFilter(self.stage_creator_window)
         self.stage_creator_window.show()
 
+    def run_sequence_window_function(self):
+        self.sequence_window = Sequence_window(self,self.database_manager)
+        self.app.installEventFilter(self.sequence_window)
+        # self.sequence_window.show()  #not called since called within init which is required for error open window sequencing
+
+    def run_run_sequence_window(self):
+        self.run_sequence_window = Run_sequence_window(self,self.database_manager,self.light_display_window)
+        # self.run_sequence_window.show() #not called since within init which is required for error window sequencing
+
     def select_light_type(self,light_type):
         for fixture in self.fixtures:
             if fixture is not None:
@@ -437,6 +449,7 @@ class Light_display(QWidget):
         return self.copy_lights
 
     def open_rig(self,fixtures,rig_id):
+        self.light_display_window.stop_sequence()
         self.rig_id = rig_id
         for f in self.fixtures:
             if f is not None:
@@ -476,3 +489,18 @@ class Light_display(QWidget):
 
         self.fixture_faders_window.update_faders(self.fixtures)
         self.update_universe_from_fixtures()
+
+    def set_blackout(self,blackout):
+        if blackout:
+            self.before_blackout_intensities = [None]*len(self.fixtures)
+            for i,fixture in enumerate(self.fixtures):
+                if fixture is not None:
+                    self.before_blackout_intensities[i] = fixture.get_intensity()
+                    fixture.set_intensity(0)
+            self.update_universe_from_fixtures()
+        else:
+            for i,fixture in enumerate(self.fixtures):
+                if fixture is not None:
+                    fixture.set_intensity(self.before_blackout_intensities[i])
+            self.before_blackout_intensities = []
+            self.update_universe_from_fixtures()

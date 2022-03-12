@@ -6,6 +6,7 @@ import os
 import sys
 
 from windows.error_window import Error_window
+from windows.message_window import Message_window
 from windows.open_stage_window import Open_stage_window
 from bar_and_rectangle_classes import Rectangle,Bar
 
@@ -22,6 +23,12 @@ class Light_display_window(QMainWindow,uic.loadUiType(os.path.join("windows/ui",
         self.selecting_lights = False
         self.bars = []
         self.rectangles = []
+        self.opening_playback_ids = []
+        self.looping_sequence = False
+        self.running_sequence = False
+        self.sequence_playbacks = None
+        self.stepping_sequence = False
+        self.current_playback = None
         self.initUI()
 
     def initUI(self):
@@ -38,12 +45,79 @@ class Light_display_window(QMainWindow,uic.loadUiType(os.path.join("windows/ui",
         self.record_playback_action.triggered.connect(self.record_playback_pressed)
         self.stage_creator_action.triggered.connect(self.stage_creator_pressed)
         self.open_stage_action.triggered.connect(self.open_stage_pressed)
+        self.sequence_action.triggered.connect(self.sequence_pressed)
+        self.run_sequence_action.triggered.connect(self.run_sequence_pressed)
+        self.stop_sequence_action.triggered.connect(self.stop_sequence_pressed)
+        self.blackout_button.clicked.connect(self.blackout_pressed)
+
+    def blackout_pressed(self):
+        self.light_display.set_blackout(self.blackout_button.isChecked())
+
+    def run_sequence_pressed(self):
+        self.light_display.run_run_sequence_window()
+
+    def set_looping_sequence(self,looping_sequence):
+        self.looping_sequence = looping_sequence
+
+    def stop_sequence_pressed(self):
+        self.stop_sequence()
+        self.message_window = Message_window("The sequence was stopped")
+
+    def stop_sequence(self):
+        self.looping_sequence = False
+        self.running_sequence = False
+        self.stepping_sequence = False
+        self.opening_playback_ids = []
+
+    def run_sequence(self,sequence_playbacks,loop=False,step=False):
+        self.looping_sequence = loop
+        self.running_sequence = True
+        self.sequence_playbacks = sequence_playbacks
+
+        if step:
+            self.stepping_sequence = True
+            self.current_playback = 0
+            for playback in self.sequence_playbacks:
+                self.opening_playback_ids.append(playback["playback_id"])
+            self.open_playback()
+        else:
+            self.stepping_sequence = False
+            QTimer.singleShot(1,self.iterate_sequence)
+
+    def iterate_sequence(self):
+        current_time_delay = 0
+        for playback in self.sequence_playbacks:
+            self.opening_playback_ids.append(playback["playback_id"])
+            time_delay = playback["time_delay"]
+            current_time_delay += time_delay
+            QTimer.singleShot(current_time_delay*1000,self.open_playback) #calls the open playback function after time_delay milliseconds
+        if self.looping_sequence:
+            QTimer.singleShot(current_time_delay*1000,self.iterate_sequence)
+        else:
+            QTimer.singleShot((1+current_time_delay)*1000,self.stop_sequence)
+
+
+    def open_playback(self):
+        if self.running_sequence:
+            if self.stepping_sequence:
+                playback_id = self.opening_playback_ids[self.current_playback]
+            else:
+                playback_id = self.opening_playback_ids.pop(0)
+            channel_values_ids = self.database_manager.query_db("SELECT channel_values_id from Playbacked WHERE playback_id = ?",(playback_id,))
+            channel_values = []
+            for channel_value_dict in channel_values_ids:
+                channel_values.append(self.database_manager.query_db("SELECT channel_number,channel_value FROM Channel_values WHERE channel_values_id=?",(channel_value_dict["channel_values_id"],))[0])
+            self.light_display.open_playback(channel_values,[])
+
+
+    def sequence_pressed(self):
+        self.light_display.run_sequence_window_function()
 
     def open_stage_pressed(self):
         self.open_stage_window = Open_stage_window(self.light_display,self.database_manager,self)
         self.open_stage_window.show()
 
-    def open_location_by_location_naem(self,location_name):
+    def open_location_by_location_naem(self,location_name): #Spelt wrong? Where is this called from?
         location_id_dict = self.database_manager.query_db("SELECT location_id FROM Locations WHERE location_name = ?",(location_name,))
         if len(location_id_dict) == 0:
             raise Exception("No location with that name exists")
@@ -74,10 +148,6 @@ class Light_display_window(QMainWindow,uic.loadUiType(os.path.join("windows/ui",
         for rectangle in rectangles:
             self.new_rectangle = Rectangle(self,rectangle["xpos"],rectangle["ypos"],rectangle["width"],rectangle["height"])
             self.rectangles.append(self.new_rectangle)
-
-
-
-
 
     def stage_creator_pressed(self):
         self.light_display.run_stage_creator_window()
@@ -149,6 +219,31 @@ class Light_display_window(QMainWindow,uic.loadUiType(os.path.join("windows/ui",
                             x = event.x()
                             y = event.y()
                             self.light_display.check_for_light_click(x,y)
+        if (event.type() == QEvent.KeyPress):
+            key = event.key()
+            if self.stepping_sequence:
+                if key == Qt.Key_Space:
+                    if self.looping_sequence:
+                        self.current_playback = (self.current_playback+1)%len(self.opening_playback_ids)
+                    else:
+                        if self.current_playback+1 == len(self.opening_playback_ids):
+                            self.stop_sequence()
+                        else:
+                            self.current_playback += 1
+                    self.open_playback()
+                    return 1 #stops double trigger
+                elif key == Qt.Key_Backspace:
+                    if self.looping_sequence:
+                        self.current_playback = (self.current_playback-1)%len(self.opening_playback_ids)
+                    else:
+                        if self.current_playback - 1 < 0:
+                            self.stop_sequence()
+                        else:
+                            self.current_playback -= 1
+                    self.open_playback()
+                    return 1 #stops double trigger
+
+
 
         return super(Light_display_window, self).eventFilter(source, event)
 

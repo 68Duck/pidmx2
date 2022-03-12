@@ -26,13 +26,13 @@ class Record_playback_window(QMainWindow,uic.loadUiType(os.path.join("windows/ui
         rig_id = self.light_display.get_rig_id()
         if rig_id is None:
             self.close()
-            self.error_window = Error_window("No rig is open. Please open a rig before opening a playback")
+            self.error_window = Error_window("No rig is open. Please open a rig before recording a playback")
 
     def save_pressed(self):
         rig_id = self.light_display.get_rig_id()
         save_name = self.save_name_input.text()
         if save_name == "":
-            self.error_window = Error_window("Please enter a name for the rig")
+            self.error_window = Error_window("Please enter a name for the playback")
             return
         results = self.database_manager.query_db("SELECT playback_name FROM Playbacks WHERE rig_id = ? AND playback_name = ?",(rig_id,save_name))
         if len(results) > 0:
