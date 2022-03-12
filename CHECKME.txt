@@ -1,6 +1,4 @@
 
-Don't allow for sequences to change position. Only allow them to be visible and hidden.
-
 Don't include create light types as probably not needed
 
 In coursework writeup, include blackout button, select all lights and select light types as added features.
@@ -8,10 +6,6 @@ In coursework writeup, include blackout button, select all lights and select lig
 In write up mention error of 0 indexing since channels are from 1 to 512 but arrays are zero indexed
 
 Potentially mention robust design where values can only be changed through functions which have validation.
-
-For the open windows, create a template and change the names within the classes
-
-For colour mode in sequence window, have the colour chosen when colour mode is pressed?
 
 Add confirm window to close edit sequence window if unsaved changes made. Same for sequence window itself.
 
@@ -34,7 +28,7 @@ USE PREMADE CONFIRM WINDOW USING QTWINDOW thing
 
 For testing logon window try to fix invalid characters test since no characters are invalid?
 
-Check if slider pannel window needs the select buttons since not used? Same with fixture faders window
+Check if slider pannel window needs the select buttons since not used?
 
 Potentially change saving rig names since rigs can be of the same name if they are within different accounts.
 

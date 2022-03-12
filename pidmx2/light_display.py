@@ -102,7 +102,7 @@ class Light_display(QWidget):
     def add_fixture(self,x,y,light_type,fixture_number,channel_number,light_display_window,copy=False,channels=None):
         if self.preview_light:
             self.preview_light.hide()
-        if self.fixtures[fixture_number-1] is not None:
+        if self.fixtures[fixture_number-1] is not None and not copy:
             return "Fixture is already taken"
         else:
             self.new_light = None
@@ -504,3 +504,6 @@ class Light_display(QWidget):
                     fixture.set_intensity(self.before_blackout_intensities[i])
             self.before_blackout_intensities = []
             self.update_universe_from_fixtures()
+
+    def set_rig_id(self,rig_id):
+        self.rig_id = rig_id

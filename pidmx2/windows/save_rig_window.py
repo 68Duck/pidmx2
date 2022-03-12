@@ -57,6 +57,7 @@ class Save_rig_window(Save_window):
             light_id = con.execute("SELECT light_id FROM Lights WHERE light_type = ? AND start_channel = ? AND xpos = ? AND ypos = ?",(copy_light.get_light_type(),copy_light.get_channel_number(),copy_light.get_x(),copy_light.get_y())).fetchall()
             con.execute("INSERT INTO Lights_in_rigs(rig_id,light_id) VALUES(?,?)",(int(rig_id[0]["rig_id"]),int(light_id[0]["light_id"])))
         con.commit()
+        self.light_display.set_rig_id(rig_id[0]["rig_id"])
         self.message_window = Message_window(f"The rig was saved as {save_name}")
         self.close()
 
