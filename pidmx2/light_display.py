@@ -81,6 +81,7 @@ class Light_display(QWidget):
                         if light.get_channel_number() == fixture.get_channel_number() and light.get_fixture_number() == fixture.get_fixture_number():
                             light.set_channel(i,channel[1])
         self.fixture_faders_window.update_faders(self.fixtures)
+        self.send_raspberry_pi_data()
 
     def update_universe_from_copy_light(self,light):
         for fixture in self.fixtures:
@@ -98,6 +99,7 @@ class Light_display(QWidget):
                     self.set_dmx(channel_number+i,channel[1])
                     l.set_channel(i,channel[1])
         self.fixture_faders_window.update_faders(self.fixtures)
+        self.send_raspberry_pi_data()
 
     def add_fixture(self,x,y,light_type,fixture_number,channel_number,light_display_window,copy=False,channels=None):
         if self.preview_light:
@@ -291,22 +293,31 @@ class Light_display(QWidget):
         self.run_light_display_window()
 
     def send_dmx(self):
-        self.tick_effects()
         if self.sending_dmx:
             self.dmx_controller.send()
-        if self.running_raspberry_pi_dmx:
-            pass  #finish me
+            self.tick_effects(100)
+        elif self.running_raspberry_pi_dmx:
+            self.tick_effects(True)
+        else:
+            self.tick_effects()
 
-    def tick_effects(self):
+    def tick_effects(self,speed_increase_factor = 1):
         self.effects_counter += 1
         for fixture in self.fixtures:
             if fixture is not None:
-                fixture.run_effects(self.effects_counter)
-
+                fixture.run_effects(self.effects_counter,speed_increase_factor)
+        if self.sending_dmx or self.running_raspberry_pi_dmx:
+            self.update_universe_from_fixtures()
 
     def set_dmx(self,channel_number,channel_value):
         if self.sending_dmx:
             self.dmx_controller.set_data(channel_number,channel_value)
+        if self.running_raspberry_pi_dmx:
+            self.raspberry_pi_manager.set_data(channel_number,channel_value)
+
+    def send_raspberry_pi_data(self):
+        if self.running_raspberry_pi_dmx:
+            self.raspberry_pi_manager.send_data()
 
     def raspberry_test(self):
         result = self.raspberry_pi_manager.send_command("test")
@@ -406,6 +417,7 @@ class Light_display(QWidget):
             self.raspberry_pi_manager.run_file()
             self.raspberry_pi_manager.connect_client()
             self.raspberry_test_timer.start(1000)
+            self.timer.start(1000)
             self.run_light_display_window()
             return True
         except Exception as e:
@@ -467,7 +479,8 @@ class Light_display(QWidget):
                         copy = True
             self.add_fixture(fixture["xpos"],fixture["ypos"],fixture["light_type"],fixture["fixture_number"],fixture["start_channel"],self.light_display_window,copy)
         self.fixture_faders_window.update_faders(self.fixtures)
-        self.dmx_controller.send_zero()
+        if self.sending_dmx:
+            self.dmx_controller.send_zero()
         self.update_universe_from_fixtures()
 
     def open_playback(self,channel_values,light_effects):

@@ -123,13 +123,20 @@ class Light_type(object):
         return None
 
 
-    def run_effects(self,effects_counter):
-        if self.effects["Rainbow"] > 0:
-            if effects_counter % (256-self.effects["Rainbow"]) == 0:
-                self.next_rainbow()
-        if self.effects["Chaser"] > 0:
-            if effects_counter % ((256-self.effects["Chaser"])*100) == 0:
+    def run_effects(self,effects_counter,speed_increase_factor):
+        if speed_increase_factor is True:
+            if self.effects["Rainbow"] > 0:
+                for i in range(100):
+                    self.next_rainbow()
+            if self.effects["Chaser"] > 0:
                 self.next_chase()
+        else:
+            if self.effects["Rainbow"] > 0:
+                if effects_counter % max((256-self.effects["Rainbow"])//speed_increase_factor,1) == 0:
+                    self.next_rainbow()
+            if self.effects["Chaser"] > 0:
+                if effects_counter % ((256-self.effects["Chaser"])*(100//speed_increase_factor)) == 0:
+                    self.next_chase()
 
     def set_chase(self,chase):
         self.chase = chase

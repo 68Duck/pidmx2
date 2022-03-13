@@ -235,6 +235,7 @@ class Database_manager(object):
     	"sequence_id"	INTEGER NOT NULL UNIQUE,
     	"rig_id"	INTEGER NOT NULL,
     	"sequence_name"	TEXT NOT NULL,
+        FOREIGN KEY("rig_id") REFERENCES "Rigs"("rig_id") ON DELETE CASCADE,
     	PRIMARY KEY("sequence_id" AUTOINCREMENT)
         )""")
 
