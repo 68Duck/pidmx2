@@ -467,6 +467,8 @@ class Light_display(QWidget):
                         copy = True
             self.add_fixture(fixture["xpos"],fixture["ypos"],fixture["light_type"],fixture["fixture_number"],fixture["start_channel"],self.light_display_window,copy)
         self.fixture_faders_window.update_faders(self.fixtures)
+        self.dmx_controller.send_zero()
+        self.update_universe_from_fixtures()
 
     def open_playback(self,channel_values,light_effects):
         for fixture in self.fixtures: #Clear effects

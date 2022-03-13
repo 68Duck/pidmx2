@@ -1,7 +1,6 @@
 procedure create_account(username,password) //creates an account by inserting a username and hashed password into a database
     hash = hash_password(password) //hashes the password
-    usernames = SQL_execute("SELECT usernames FROM accounts WHERE username=?",(username)) //retrieves any saved usernames with the same name as the inputted username
-    Select all usernames from accounts where the useranme is the same
+    usernames = SQL_execute("SELECT usernames FROM Accounts WHERE username=?",(username)) //retrieves any saved usernames with the same name as the inputted username
     if usernames.length > 0  //checks if there are any usernames with the same name
         display_error("There is a username which has the same name. Please try a different username")
     else if username.length > 16 or username.length < 3  //checks the username length is between 3 and 16
@@ -12,14 +11,13 @@ procedure create_account(username,password) //creates an account by inserting a 
         display_error("Please input a password.")
     else
         Insert the username and hash into the accounts tables.
-        SQL_execute("INSERT INTO logon(username,hash) Values(?,?)",(username,hash))  //inserts the new username and hashed password into the database if all the validation is passed
+        SQL_execute("INSERT INTO Accounts(username,hash) Values(?,?)",(username,hash))  //inserts the new username and hashed password into the database if all the validation is passed
     endif
 endprocedure
 
 
 function check_password(username,password) //checks if the login details are valid
     hash = hash_password(password) //hashses the password
-    Select the hash from the accounts table where the username is equal to the input usernmae
     correct_hash = SQL_execute("SELECT hash FROM accounts WHERE username=?",(username)) //checks if the hash of the password is the same as the one stored in the database
     if correct_hash.length == 0 //checks there are any results otherwise there is no username with the same name
         display_error("There is no username with that name. Please try again")
@@ -181,21 +179,23 @@ procedure remove_light(light) //removes a light
     light_list.remove(light) //remvoes the light once the channels have been turned off
 endprocedure
 
-procedure save_rig(light_list,rig_table_name) //saves the rig so saves all lights in a new table called rig_table_name
+procedure save_rig(light_list,rig_name) //saves the rig
+    SQL_execute("INSERT INTO Rigs(rig_name) Values(?)",(rig_name,))
     for i = 0 to light_list.length-1 //iterates through each light in the light_list
         light = light_list[i]
-        Insert the relevent information into the rigs table.
-        SQL_execute("INSERT INTO (?)(light_type,position,channel_number) VALUES(?,?,?)",(rig_table_name,light.light_type,light.position,light.channel_number)) // inserts the light information into the new_rig table
+        SQL_execute("INSERT INTO Lights(light_type,xpos,ypos,start_channel,fixture_number) VALUES(?,?,?)",(light.light_type,light.xpos,light.ypos,light.channel_number,light.fixture_number)) // inserts the light information into the new_rig table
     next i
 endprocedure
 
 procedure open_rig(rig_table_name) //opens the rig from the information in the rig table
-    database_information = SQL_execute("SELECT (light_type,position,channel_number) FROM (rig_table_name)") //retrieves all relevent information from the table
+    rig_id = SQL_execute("SELECT rig_id FROM Rigs WHERE rig_name = ?",(rig_name,)) //retrieves all relevent information from the table
+    light_ids = SQL_execute("SELECT light_id from Lights_in_rigs WHERE rig_id = ?",(rig_id,))
     light_list = []
-    for i = 0 to database_information.length-1 //iterates through all the infromation retrived through the table
-        type = database_information[i]["light_type"]
-        position = database_information[i]["position"]
-        channel_number = database_information[i]["channel_number"]
+    for i = 0 to light_ids.length-1 //iterates through all the infromation retrived through the table
+        light = SQL_execute("SELECT light_type,xpos,ypos,start_channel,fixture_number FROM Lights WHERE light_id=?",(light_ids[i]))
+        type = light["light_type"]
+        position = light["position"]
+        channel_number = light["channel_number"]
         light = new Light(type,position,channel_number) //creates a new light with the new light information
         no_channels = light.get_channels().length
         for j = channel_number to channel_number + no_channels //iterates through all channels of the light
@@ -205,25 +205,26 @@ procedure open_rig(rig_table_name) //opens the rig from the information in the r
     next i
 endprocedure
 
-procedure delete_rig(rig_name) //deletes the rig table
-    SQL_execute("DELETE FROM rigs WHERE rig_name = (?)",rig_name)
+procedure delete_rig(rig_name) //deletes the rig information
+    SQL_execute("DELETE FROM Rigs WHERE rig_name = (?)",rig_name)
 endprocedure
 
-procedure save_playback(light_list,playback_table_name) // saves the playback into the database
+procedure save_playback(light_list,playback_name) // saves the playback into the database
+    SQL_execute("INSERT INTO Playbacks(playback_name) VALUES (?)",(playback_name,))
     for i = 0 to light_list.length-1 //iterates through all the lights in the light_list
         light = light_list[i]
         no_channels = light.get_channels().length()
         for j = light.channel_number to light.channel_number + no_channels // iterates through the channels of the lights
-            SQL_execute("INSERT INTO (?)(channel_number,channel_value) VALUES(?,?)",(light.channel_number+j,channel_value)) //inserts the channel values into the database
+            SQL_execute("INSERT INTO Channel_values(channel_number,channel_value) VALUES(?,?)",(light.channel_number+j,channel_value)) //inserts the channel values into the database
         next j
     next i
 endprocedure
 
-procedure open_playback(light_list,playback_table_name) //opens the playback from the database
-    database_information = SQL_execute("SELECT (channel_number,channel_value) FROM (playback_table_name)") //retrives all relevent information from the database
-    for i = 0 to database_information.length-1 //iterates through all the relevent infromation
-        channel_number = database_information[i]["channel_number"]
-        channel_value = database_information[i]["channel_value"]
+procedure open_playback(light_list,playback_id) //opens the playback from the database
+    channel_values = SQL_execute("SELECT (channel_number,channel_value) FROM Channel_values WHERE playback_id = ?",(playback_id)) //retrives all relevent information from the database
+    for i = 0 to channel_values.length-1 //iterates through all the relevent infromation
+        channel_number = channel_values[i]["channel_number"]
+        channel_value = channel_values[i]["channel_value"]
         set_channel(channel_number,channel_value) //sets the channel to the saved value
     next i
     for j = 0 to light_list.length-1 //iterates through each light in the light_list
@@ -266,37 +267,23 @@ procedure set_colour(light,colour) //sets the colour of the light
 endprocedure
 
 procedure save_sequence(sequence_id,sequence_name,sequence_lights,playbacks_id) //saves the sequence to the database
-    SQL_execute("INSERT INTO sequences(name,sequence_id,playbacks_id) VALUES(?,?)",(sequence_name,sequence_id,playbacks_id))  //playbacks_id is the id of the table where the playbacks are stored for this sequnece
-    SQL_execute("CREATE TABLE (sequence_table_name) (
-      sequence_table_name = "sequence" + sequence_id
-    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    light_type TEXT NOT NULL,
-    position TEXT NOT NULL,
-    channel_number INT NOT NULL
-    ))") //creates the new table for the sequence playback
+    SQL_execute("INSERT INTO Sequences(sequence_name) VALUES(?)",(sequence_name,))  //playbacks_id is the id of the table where the playbacks are stored for this sequnece
     for i = 0 to sequence_lights.length-1 //iterates through all the sequence lights
         light = sequence_lights[i]
-        type = light.light_type
-        position = light.position
-        channel_number = light.channel_number
-        SQL_execute("INSERT INTO (sequence_table_name)(type,position,channel_number) VALUES(?,?,?)",(type,position,start_channel)) //inserts the infromation into the sequence playback table
+        light_id = light.light_id
+        SQL_execute("INSERT INTO Lights_in_sequence(sequence_id,light_id) VALUES(?,?)",(sequence_id,light_id)) //inserts the information into the lights in sequence table
     next i
 endprocedure
 
 procedure open_sequence(sequence_name) //opens a saved sequence
-    id = SQL_execute("SELECT sequene_id FROM sequences WHERE name=(sequence_name)") //finds the id of the sequence
+    id = SQL_execute("SELECT sequence_id FROM sequences WHERE name=(sequence_name)") //finds the id of the sequence
     if id == None
         ERROR
     else
         sequence_lights = []
-        sequence_table_name = "sequence" + id  //finds the table name by concatinating "sequence" with id
-        database_information = SQL_execute("SELECT (light_type,position,start_channel) FROM (sequence_table_name)") //retrives all relevent information from the database
-        for i = 0 to database_information.length-1 //iterates therough the information from the database
-          type = database_information[i]["light_type"]
-          position = database_information[i]["position"]
-          channel_number = database_information[i]["channel_number"]
-          light = new Sequence_light(type,position,channel_number) //creates the new sequence lights from the database information
-          sequence_lights.appened(light)
+        light_ids = SQL_execute("SELECT light_id from Lights_in_sequence WHERE sequence_id = ?",(sequence_id,)) //retrives all relevent information from the database
+        for i = 0 to light_ids.length-1 //iterates therough the information from the database
+          sequence_lights.appened(light_ids)
         next i
     endif
 endprocedure
@@ -306,28 +293,22 @@ procedure open_next_playback(sequence_name,light_list) //opens the next playback
     if playbacks_id == None
         ERROR
     else
-        playbacks_table_name = "sequence_playbacks" + playbacks_id //gets the playback table name
         next_id = get_next_playback_id()
-        playback_table_name = SQL_execute("SELECT (playback_table_name) FROM (playbacks_table_name) WHERE playback_id = (next_id)") //finds the playback table name
-        if playback_table_name == None
-            ERROR
-        else
-            open_playback(light_list,playback_table_name) //opends the relevent playback with the found playback table name
+        open_playback(light_list,next_id) //opends the relevent playback with the found playback table name
         endif
     endif
 endprocedure
 
 procedure run_sequence(sequence_name) //runs the named sequence
-    playbacks_id = SQL_execute("SELECT playback_id FROM sequencs WHERE sequence_name = (sequence_name)") //finds the playback name
-    if playbacks_id == None
+    playbacks_ids = SQL_execute("SELECT playback_id FROM Sequences WHERE sequence_name = (sequence_name)") //finds the playback ids
+    if playbacks_ids == None
         ERROR
     else
-        playbacks_table_name = "sequence_playbacks" + playbacks_id //finds the playback table name
-        time_delays = SQL_execute("SELECT (time_delay) FROM (playbacks_table_name)") //finds the time delays
-        for i = 0 to time_delays.length-1 //iterates through each fo the time delays
-            open_next_playback(sequence_name,light_list) //opens the playback
-            wait(time_delay) //waits for the time delay before playing the next playback
-        next i
+        for i = 0 to playbacks_ids.length-1
+          playback_id = playbacks_ids[i]
+          time_delay = SQL_execute("SELECT time_delay FROM Sequences WHERE playback_id = ?",(playback_id))
+          wait(time_delay)
+          open_playabck(light_list,playback_id)
     endif
 endprocedure
 /*

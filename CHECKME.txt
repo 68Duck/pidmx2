@@ -3,8 +3,6 @@ Don't include create light types as probably not needed
 
 In coursework writeup, include blackout button, select all lights and select light types as added features.
 
-In write up mention error of 0 indexing since channels are from 1 to 512 but arrays are zero indexed
-
 Potentially mention robust design where values can only be changed through functions which have validation.
 
 Have effects as a property of the light. In send effects to lights (a function called in the main run loop), update the values of the channels depending on the current effect values.
