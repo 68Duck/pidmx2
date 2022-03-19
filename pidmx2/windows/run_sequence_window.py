@@ -24,11 +24,15 @@ class Run_sequence_window(QMainWindow,uic.loadUiType(os.path.join("windows/ui","
             self.error_window = Error_window("There is not rig open. Please open a rig before trying to run a sequence")
             self.close()
             return
-        else:
-            self.show()
         sequences = self.database_manager.query_db("SELECT sequence_name FROM Sequences WHERE rig_id = ?",(rig_id,))
+        if len(sequences) == 0:
+            self.error_window = Error_window("There are no sequences in this rig. Please save a sequence before trying to run a sequence")
+            self.close()
+            return
+
         for sequence in sequences:
             self.drop_down.addItem(sequence["sequence_name"])
+        self.show()
 
     def run_pressed(self):
         sequence_name = self.drop_down.currentText()

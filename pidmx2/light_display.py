@@ -267,7 +267,8 @@ class Light_display(QWidget):
             self.raspberry_pi_manager.send_stop()
             del self.raspberry_pi_manager
         except Exception as e:
-            print(e)
+            # print(e)
+            pass
         try: #close any dmx controllers if they exist
             self.dmx_controller.ser.close()
             del self.dmx_controller

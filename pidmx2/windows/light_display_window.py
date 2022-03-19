@@ -70,6 +70,9 @@ class Light_display_window(QMainWindow,uic.loadUiType(os.path.join("windows/ui",
         self.opening_playback_ids = []
 
     def run_sequence(self,sequence_playbacks,loop=False,step=False):
+        if len(sequence_playbacks) == 0:
+            self.error_window = Error_window("There are no playbacks in that sequence.")
+            return
         self.looping_sequence = loop
         self.running_sequence = True
         self.sequence_playbacks = sequence_playbacks

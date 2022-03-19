@@ -238,7 +238,3 @@ class Database_manager(object):
         FOREIGN KEY("rig_id") REFERENCES "Rigs"("rig_id") ON DELETE CASCADE,
     	PRIMARY KEY("sequence_id" AUTOINCREMENT)
         )""")
-
-
-if __name__ == "__main__":
-    db_manager = Database_manager()
